@@ -13,11 +13,13 @@ pub enum Token {
     ParenClose,
     EOF,
 }
+
 struct Lexer {
     input: Vec<char>,
     position: usize,
     current_char: Option<char>,
 }
+
 impl Lexer {
     pub fn new(script: String, start_position: usize) -> Self {
         let mut lexer = Lexer {
@@ -57,7 +59,7 @@ impl Lexer {
     }
 }
 
-const APPLESOFT_KEYWORDS: [&'static str] = [
+pub const APPLESOFT_KEYWORDS: &'static [&'static str] = &[
     "END", "FOR", "NEXT", "DATA", "INPUT", "DEL", "DIM", "READ", "GR", "TEXT", "PR#", "IN#",
     "CALL", "PLOT", "HLIN", "VLIN", "HGR2", "HGR", "HCOLOR=", "HPLOT", "DRAW", "XDRAW", "HTAB",
     "HOME", "ROT=", "SCALE=", "SHLOAD", "TRACE", "NOTRACE", "NORMAL", "INVERSE", "FLASH", "COLOR=",
@@ -67,12 +69,12 @@ const APPLESOFT_KEYWORDS: [&'static str] = [
     "STEP",
 ];
 
-const APPLESOFT_FUNCTIONS: [&'static str] = [
+pub const APPLESOFT_FUNCTIONS: &'static [&'static str] = &[
     "SGN", "INT", "ABS", "USR", "FRE", "SCRN", "PDL", "POS", "SQR", "RND", "LOG", "EXP", "COS",
     "SIN", "TAN", "ATN", "PEEK", "LEN", "STR$", "VAL", "ASC", "CHR$", "LEFT$", "RIGHT$", "MID$",
 ];
-const APPLESOFT_OPERATORS: [&'static str] =
-    ["+", "-", "*", "/", "^", ">", "=", "<", "AND", "OR", "NOT"];
-const UNIXSOFT_KEYWORDS: [&'static str] = [];
-const UNIXSOFT_FUNCTIONS: [&'static str] = [];
-const UNIXSOFT_OPERATORS: [&'static str] = [">=", "<=", "!="];
+pub const APPLESOFT_OPERATORS: &'static [&'static str] =
+    &["+", "-", "*", "/", "^", ">", "=", "<", "AND", "OR", "NOT"];
+pub const UNIXSOFT_KEYWORDS: &'static [&'static str] = &[];
+pub const UNIXSOFT_FUNCTIONS: &'static [&'static str] = &[];
+pub const UNIXSOFT_OPERATORS: &'static [&'static str] = &[">=", "<=", "!="];
