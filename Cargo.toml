@@ -2,7 +2,7 @@
 name = "usbasic"
 version = "0.1.0"
 edition = "2024"
-
+exclude = ["sandbox/"]
 [profile.release]
 opt-level ="z"
 strip = true
