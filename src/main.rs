@@ -10,7 +10,19 @@ enum Command {
     Help,
 }
 fn show_help() {
-    println!("usbasic - UnixSoft BASIC compiler and cli tool");
+    println!(
+        r#"
+        usbasic - UnixSoft BASIC compiler and cli tool (AMD64)
+        dependencies: ld, nasm
+
+        commands:
+
+        init [<dir>] - creates the default project structure in current or given directory
+        build <entrypoint> - builds the project using <entrypoint> as the entry to the application
+        run <entrypoint> - same as build, but runs the executable immediately
+        help - shows this help message
+        "#
+    );
 }
 impl Command {
     fn new(args: Arguments) -> Result<Self, ()> {
