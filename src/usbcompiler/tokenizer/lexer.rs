@@ -33,7 +33,7 @@ enum CharType {
 }
 
 #[derive(Debug, Clone)]
-struct Span {
+pub struct Span {
     pub line: usize,
     pub column: usize,
     pub length: usize,
