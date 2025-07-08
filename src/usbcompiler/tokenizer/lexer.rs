@@ -1,5 +1,5 @@
 #[derive(Debug, Clone, PartialEq)]
-pub enum Token {
+pub enum TokenKind {
     // Add more token variants as needed
     Number(String),
     StringLiteral(String),
@@ -13,6 +13,13 @@ pub enum Token {
     ParenClose,
     EOF,
 }
+
+pub struct Token {
+    kind: TokenKind,
+    position_flat: usize,
+    position_span: Span,
+}
+
 #[repr(u8)]
 #[derive(PartialEq, Eq)]
 enum CharType {
@@ -24,19 +31,37 @@ enum CharType {
     Whitespace,
     Quote,
 }
+
+#[derive(Debug, Clone)]
+struct Span {
+    pub line: usize,
+    pub column: usize,
+    pub length: usize,
+}
+impl Span {
+    pub fn new(line: usize, column: usize, length: usize) -> Self {
+        return Self {
+            line,
+            column,
+            length,
+        };
+    }
+}
 struct Lexer {
     input: Vec<char>,
-    position: usize,
+    position_flat: usize,
+    position_span: Span,
     current_char: Option<char>,
 }
 
 impl Lexer {
     ///creates a new USB Lexer given a string to tokenize and an optional character start position
-    pub fn new(script: String, start_position: usize) -> Self {
+    pub fn new(script: String) -> Self {
         let mut lexer = Lexer {
             input: script.chars().collect(),
-            position: start_position,
+            position_flat: 0,
             current_char: None,
+            position_span: Span::new(0, 0, 0),
         };
 
         lexer.advance();
@@ -44,11 +69,11 @@ impl Lexer {
     }
     ///peek into the character stream by **count** indices, returns a [`Some`] containing the peeked char if the offset given was not out of bounds. else returns [`None`]
     fn peek(&mut self, count: usize) -> Option<char> {
-        return self.input.get(self.position + count).copied();
+        return self.input.get(self.position_flat + count).copied();
     }
 
     ///peek at the next word in the stream, returning it as a copied [`String`] the position of the lexer has to be on a non white space character or this will always return [`None`]
-    fn peek_word(&mut self) -> Option<(CharType, String)> {
+    fn peek_word(&mut self) -> Option<(Span, CharType, String)> {
         let current_char = &self.current_char;
 
         if let None = current_char {
@@ -60,6 +85,8 @@ impl Lexer {
         if c.is_whitespace() {
             return None;
         }
+        let start_line = self.position_span.line;
+        let start_col = self.position_span.column;
         let mut peek_pos = 0;
         let mut last_char_type: CharType = CharType::None;
         let mut total = String::new();
@@ -79,7 +106,11 @@ impl Lexer {
             peek_pos += 1;
         }
 
-        return Some((last_char_type, total));
+        return Some((
+            Span::new(start_line, start_col, total.len()),
+            last_char_type,
+            total,
+        ));
     }
 
     ///peek at the next none whitespace character in the stream, returning a [`Some`] containing a tuple with the offsett to the next non whitespace char and the char at that position
@@ -94,8 +125,14 @@ impl Lexer {
         return None;
     }
 
-    fn consume(&mut self, count: usize) -> String {
+    fn consume(&mut self, count: usize) -> Option<(Span, String)> {
         let mut total = String::new();
+        if let None = self.current_char {
+            return None;
+        }
+
+        let start_line = self.position_span.line;
+        let start_column = self.position_span.column;
         for i in 0..count {
             if let Some(c) = self.current_char {
                 total.push(c);
@@ -105,7 +142,7 @@ impl Lexer {
             }
         }
 
-        return total;
+        return Some((Span::new(start_line, start_column, total.len()), total));
     }
     fn consume_whitespace(&mut self) {
         while let Some(c) = self.current_char {
@@ -122,22 +159,33 @@ impl Lexer {
     /// - an operator or a compound operator e.g. <= or =
     /// - a delimiter
     /// - a string literal including both the start and end quotes
-    fn consume_word(&mut self) -> Option<(CharType, String)> {
+    fn consume_word(&mut self) -> Option<(Span, CharType, String)> {
         let word = self.peek_word();
         if let Some(w) = word {
-            self.skip(w.1.len());
+            self.skip(w.2.len());
             return Some(w);
         }
         return None;
     }
     fn advance(&mut self) {
-        if self.position < self.input.len() {
-            self.current_char = Some(self.input[self.position]);
-            self.position += 1;
+        if self.position_flat < self.input.len() {
+            let c = self.input[self.position_flat];
+            self.current_char = Some(c);
+            self.position_flat += 1;
+
+            if c == '\n' {
+                self.position_span.line += 1;
+                self.position_span.column = 1;
+            } else {
+                self.position_span.column += 1;
+            }
+
+            self.position_span.length += 1;
         } else {
             self.current_char = None;
         }
     }
+
     /// advance the through the stream by `count` steps
     fn skip(&mut self, count: usize) {
         let mut index = 0;
