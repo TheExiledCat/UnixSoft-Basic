@@ -2,8 +2,23 @@ site_name: UnixSoft-BASIC Reference
 nav:
   - Home: index.md
   - Getting started: getting_started.md
-  - API Reference: USB.md
+  - USB Reference: USB.md
 theme: 
   name: material
   palette: 
     scheme: slate
+  features:
+    - toc.integrate 
+    - toc.follow
+    - navigation.top
+    - navigation.tracking
+    - navigation.expand
+    - navigation.path
+    - navigation.footer
+    - navigation.sections
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      linenums: true
+      linenums_style: table
+  - pymdownx.superfences
