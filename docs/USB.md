@@ -155,7 +155,7 @@ A lot of redundant functionality has been either added on top of. Or an alternat
 
      - Also supports scopes or next like the C style loop
 
-   - ### NEXT
+   - #### NEXT
 
      - Syntax `NEXT [count]`
      - Forces a loop to continue from its start.
