@@ -49,7 +49,9 @@ This will create the following directory and its structure if given (can also be
 
   - `.gitignore`
 
-#### Folder structure explained
+### Folder structure explained
+
+The folders above have the following responsibilities:
 
 - `src`:
 

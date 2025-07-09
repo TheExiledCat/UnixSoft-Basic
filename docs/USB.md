@@ -68,7 +68,18 @@ A lot of redundant functionality has been either added on top of. Or an alternat
 - Scopes:
 
   - ```basic
+    BEGIN
+    LET X = 5
+    PRINT X
+    FIN
 
+    PRINT X //undefined token error
+    ```
+
+  - ```basic
+    IF X < 5 BEGIN
+    // statements....
+    FIN
     ```
 
 - `;` instead of `:` for statement seperating
