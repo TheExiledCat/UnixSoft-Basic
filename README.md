@@ -74,7 +74,7 @@ UnixSoft basic is a modern rendition of the AppleSoft BASIC language, written an
 
 ## Documentation and guides
 
-For the full spec see [USB](./USB.md)
+For the full spec see [USB](./docs/USB.md)
 
 
 
