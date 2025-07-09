@@ -1,4 +1,3 @@
-use core::error;
 use std::{fs::read_to_string, path::PathBuf};
 
 use crate::usbcompiler::{

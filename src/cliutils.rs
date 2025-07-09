@@ -1,21 +1,37 @@
-use std::{env, error::Error, fs, path::PathBuf};
+use std::{collections::hash_map::Keys, env, error::Error, fs, path::PathBuf};
 
 use pico_args::Arguments;
+
+use crate::version::Version;
 #[derive(Debug)]
 pub enum Command {
     Init { working_dir: String },
     Build { entry: String },
     Run { entry: String },
+    Version,
     Help,
 }
 pub fn show_help() {
     println!("usbasic - UnixSoft BASIC compiler and cli tool");
+    println!("commands (use command --help to see details):\n");
+    println!(
+        r#"
+            version - show version info
+            init    - initialize a new USB project
+            build   - build the current USB project
+            run     - build and run the current USB project, or run a USB file as a script
+        "#
+    );
 }
 impl Command {
     pub fn new(args: Arguments) -> Result<Self, ()> {
         let mut args = args;
         match args.subcommand().unwrap() {
             Some(arg) => {
+                if args.contains("--help") || args.contains("-h") {
+                    help_message(arg.as_str());
+                    return Err(());
+                }
                 return Ok(match arg.as_str() {
                     "init" => Command::Init {
                         working_dir: args
@@ -23,6 +39,7 @@ impl Command {
                             .unwrap()
                             .unwrap_or_else(|| String::from("./")),
                     },
+                    "version" => Command::Version,
                     _ => Command::Help,
                 });
             }
@@ -38,19 +55,29 @@ impl Command {
             Command::Build { entry } => todo!(),
             Command::Run { entry } => todo!(),
             Command::Help => todo!(),
+            Command::Version => Version::print(),
         }
         return Ok(());
     }
 }
-pub trait HelpDisplay {
-    fn display_help(&self);
-}
-impl HelpDisplay for Command {
-    fn display_help(&self) {
-        todo!()
-    }
-}
 
+fn help_message(command_name: &str) {
+    println!("\n{}\n", command_name);
+    match command_name {
+        "init" => println!(
+            "Create a new USB project in a given directory and create it if it does not exist.\nUSAGE: usbasic init [directory=./]\n"
+        ),
+        "build" => println!(
+            "Build the current USB project and output the final binary into the build/ directory, must be used in an existing USB project.\nUSAGE: usbasic build"
+        ),
+        "run" => println!(
+            "Builds the current USB project using usbasic build and runs the final binary or runs the given .usb file as if it were a script\nUSAGE: usbasic run [usb_file]"
+        ),
+        "version" => println!("Shows version information\nUSAGE: usbasic version"),
+        _ => show_help(),
+    }
+    println!();
+}
 fn relative_to_absolute(path: PathBuf) -> PathBuf {
     if path.is_absolute() {
         return path;

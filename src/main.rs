@@ -3,6 +3,7 @@ use pico_args::Arguments;
 
 mod cliutils;
 mod usbcompiler;
+mod version;
 
 fn main() -> Result<(), u8> {
     let args = Arguments::from_env();
