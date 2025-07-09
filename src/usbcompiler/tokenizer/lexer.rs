@@ -65,7 +65,7 @@ impl Lexer {
             input: script.chars().collect(),
             position_flat: 0,
             current_char: None,
-            position_span: Span::new(0, 0, 0),
+            position_span: Span::new(1, 1, 1),
         };
 
         lexer.advance();
@@ -84,7 +84,7 @@ impl Lexer {
             return None;
         }
 
-        let mut c = current_char.unwrap();
+        let c = current_char.unwrap();
 
         if c.is_whitespace() {
             return None;
@@ -95,6 +95,7 @@ impl Lexer {
         let mut last_char_type: CharType = CharType::None;
         let mut total = String::new();
         total.push(c);
+        last_char_type = Lexer::get_char_type(&c);
         while let Some(c) = self.peek(peek_pos) {
             let new_char_type = Lexer::get_char_type(&c);
             if last_char_type != CharType::None {
@@ -111,9 +112,8 @@ impl Lexer {
             peek_pos += 1;
         }
 
-        if let Some(last_char) = &total.chars().last() {
-            last_char_type = Lexer::get_char_type(&last_char);
-        }
+        let first_char = total.as_bytes()[0].clone() as char;
+        last_char_type = Lexer::get_char_type(&first_char);
 
         println!("Peeked word: {}", total);
         return Some((
@@ -159,7 +159,7 @@ impl Lexer {
     }
     fn consume_whitespace(&mut self) {
         while let Some(c) = self.current_char {
-            if !c.is_whitespace() {
+            if c == '\n' || !c.is_whitespace() {
                 break;
             }
             self.advance();
@@ -175,7 +175,7 @@ impl Lexer {
     fn consume_word(&mut self) -> Option<(Span, CharType, String)> {
         let word = self.peek_word();
         if let Some(w) = word {
-            self.skip(w.2.chars().count());
+            self.skip(w.2.chars().count() - 1);
             return Some(w);
         }
         return None;
@@ -262,11 +262,17 @@ impl Lexer {
             panic!("Invalid symbol detected");
         };
     }
+    /// get all the symbol handlers that resolve symbols into tokens.
+    /// Note: the order of these handlers matters as this is the order they will be evaluated in
+    /// If any of the handlers returns a token the rest of the handlers will not be used. E.g. if the keyword handler finds that the current word is a keyword, the identifier handler wont be called on that same word
+    /// TLDR; Order this list by precedence
     fn get_handlers(&self) -> Vec<TokenRecognizer> {
         return vec![
             Self::handle_newline,
             Self::handle_integer_literal,
+            Self::handle_operator,
             Self::handle_keyword,
+            Self::handle_identifier,
         ];
     }
     pub fn next_token(&mut self) -> Result<Option<Token>, LexerError> {
@@ -366,24 +372,67 @@ impl Lexer {
         }
         return Err(LexerError::UnexpectedEof);
     }
+    fn handle_operator(&mut self, character: char) -> Result<Option<Token>, LexerError> {
+        println!("Handling operator starting with: {}", character);
+
+        let word = self.peek_word();
+
+        if let Some(t) = word {
+            if !APPLESOFT_OPERATORS.contains(&t.2.as_str())
+                && !UNIXSOFT_OPERATORS.contains(&t.2.as_str())
+            {
+                return Ok(None);
+            }
+            self.consume_word();
+
+            return Ok(Some(Token {
+                kind: TokenKind::Operator(t.2),
+                position_flat: self.position_flat,
+                position_span: t.0,
+            }));
+        }
+        return Ok(None);
+    }
     fn handle_keyword(&mut self, character: char) -> Result<Option<Token>, LexerError> {
         if !character.is_ascii_alphabetic() {
             return Ok(None);
         }
         println!("Handling ascii alphabetic for keyword: {}", character);
 
-        let word = self.consume_word();
+        let word = self.peek_word();
 
         if let Some(t) = word {
-            if APPLESOFT_KEYWORDS.contains(&t.2.as_str())
-                || UNIXSOFT_KEYWORDS.contains(&t.2.as_str())
+            if APPLESOFT_KEYWORDS.contains(&t.2.to_uppercase().as_str())
+                || UNIXSOFT_KEYWORDS.contains(&t.2.to_uppercase().as_str())
             {
+                self.consume_word();
                 return Ok(Some(Token {
                     kind: TokenKind::Keyword(t.2),
                     position_flat: self.position_flat,
                     position_span: t.0,
                 }));
             }
+        }
+        return Ok(None);
+    }
+    fn handle_identifier(&mut self, character: char) -> Result<Option<Token>, LexerError> {
+        if !character.is_ascii_alphabetic() {
+            return Ok(None);
+        }
+        println!(
+            "Handling ascii alphabetic for identifier starting with: {}",
+            character
+        );
+
+        let word = self.peek_word();
+
+        if let Some(t) = word {
+            self.consume_word();
+            return Ok(Some(Token {
+                kind: TokenKind::Identifier(t.2),
+                position_flat: self.position_flat,
+                position_span: t.0,
+            }));
         }
         return Ok(None);
     }
@@ -405,7 +454,7 @@ pub const APPLESOFT_FUNCTIONS: &'static [&'static str] = &[
 ];
 pub const APPLESOFT_OPERATORS: &'static [&'static str] =
     &["+", "-", "*", "/", "^", ">", "=", "<", "AND", "OR", "NOT"];
-pub const UNIXSOFT_KEYWORDS: &'static [&'static str] = &[];
+pub const UNIXSOFT_KEYWORDS: &'static [&'static str] = &["TRUE", "FALSE", "//"];
 pub const UNIXSOFT_FUNCTIONS: &'static [&'static str] = &[];
 pub const UNIXSOFT_OPERATORS: &'static [&'static str] = &[">=", "<=", "!="];
 pub const UNIXSOFT_DELIMITERS: &'static [&'static str] = &["(", ")", "[", "]", ",", ":"];
@@ -442,35 +491,88 @@ mod tests {
     }
     #[test]
     fn test_recognize_simple_keyword() {
-        let input = "10 PRINT 5";
-        let mut lexer = Lexer::new(input.into());
-        let result = lexer.tokenize();
-
-        let mut tokens = None;
-        let mut errors: Option<Vec<LexerError>> = None;
-        if let Ok(t) = result {
-            tokens = Some(t);
-        } else if let Err(t) = result {
-            tokens = Some(t.0);
-            errors = Some(t.1)
-        }
-        assert!(
-            errors.is_none(),
-            "Lexer returned one or more errors: {:#?}\nTokens: {:#?}",
-            errors,
-            tokens,
-        );
-
+        let input = "PRINT 5";
         let expected_tokens = vec![
-            TokenKind::Number("10".into()),
             TokenKind::Keyword("PRINT".into()),
             TokenKind::Number("5".into()),
             TokenKind::EOF,
         ];
+        assert_script_tokens(input, expected_tokens);
+    }
+    #[test]
+    fn test_recognize_words() {
+        let input = "10 PRINT5 10";
+        let expected_tokens = vec![
+            TokenKind::Number("10".into()),
+            TokenKind::Identifier("PRINT5".into()),
+            TokenKind::Number("10".into()),
+            TokenKind::EOF,
+        ];
+        assert_script_tokens(input, expected_tokens);
+        let input = "5PRINT 10";
+        let expected_tokens = vec![
+            TokenKind::Number("5".into()),
+            TokenKind::Keyword("PRINT".into()),
+            TokenKind::Number("10".into()),
+            TokenKind::EOF,
+        ];
+        assert_script_tokens(input, expected_tokens);
+    }
+    #[test]
+    fn test_newlines() {
+        let input = "10 PRINT 5\n20 PRINT 10";
+        let expected_tokens = vec![
+            TokenKind::Number("10".into()),
+            TokenKind::Keyword("PRINT".into()),
+            TokenKind::Number("5".into()),
+            TokenKind::Newline,
+            TokenKind::Number("20".into()),
+            TokenKind::Keyword("PRINT".into()),
+            TokenKind::Number("10".into()),
+            TokenKind::EOF,
+        ];
+        assert_script_tokens(input, expected_tokens);
+    }
+    #[test]
+    fn test_recognize_single_or_double_operators() {
+        let input = "LET X = 10\nPRINT X + 5";
+        let expected_tokens = vec![
+            TokenKind::Keyword("LET".into()),
+            TokenKind::Identifier("X".into()),
+            TokenKind::Operator("=".into()),
+            TokenKind::Number("10".into()),
+            TokenKind::Newline,
+            TokenKind::Keyword("PRINT".into()),
+            TokenKind::Identifier("X".into()),
+            TokenKind::Operator("+".into()),
+            TokenKind::Number("5".into()),
+            TokenKind::EOF,
+        ];
+        assert_script_tokens(input, expected_tokens.clone());
 
-        let actual_tokens: Vec<TokenKind> =
-            tokens.unwrap().iter().map(|t| t.kind.clone()).collect();
+        let input = "LET X = 10\nPRINT X+5";
+        assert_script_tokens(input, expected_tokens);
 
-        assert_eq!(expected_tokens, actual_tokens);
+        let input = "PRINT X <= 5";
+        let expected_tokens = vec![
+            TokenKind::Keyword("PRINT".into()),
+            TokenKind::Identifier("X".into()),
+            TokenKind::Operator("<=".into()),
+            TokenKind::Number("5".into()),
+            TokenKind::EOF,
+        ];
+        assert_script_tokens(input, expected_tokens);
+
+        let input = "LET X = TRUE AND TRUE";
+        let expected_tokens = vec![
+            TokenKind::Keyword("LET".into()),
+            TokenKind::Identifier("X".into()),
+            TokenKind::Operator("=".into()),
+            TokenKind::Keyword("TRUE".into()),
+            TokenKind::Operator("AND".into()),
+            TokenKind::Keyword("TRUE".into()),
+            TokenKind::EOF,
+        ];
+        assert_script_tokens(input, expected_tokens);
     }
 }

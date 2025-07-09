@@ -98,7 +98,7 @@ pub struct IfStatementNode {
 
 #[derive(Debug)]
 pub struct ScopeNode {
-    pub statements: Vec<AstNode>,
+    pub statements: Vec<Statement>,
 }
 
 #[derive(Debug)]
