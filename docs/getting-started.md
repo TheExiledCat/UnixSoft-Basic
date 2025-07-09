@@ -5,7 +5,9 @@ hide:
 
 # Getting Started
 
----
+## About
+
+USB is meant to be a modern rendition on AppleSoft-BASIC, this means that just like applesoft, USB is meant mostly as a learning ground for new programmers to program in a very simple language while still being able to use it for scripting later on.
 
 ## Installation
 

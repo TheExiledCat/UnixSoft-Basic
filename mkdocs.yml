@@ -3,7 +3,7 @@ site_url: https://theexiledcat.github.io/UnixSoft-Basic/
 use_directory_urls: false
 nav:
   - Home: index.md
-  - Getting started: getting_started.md
+  - Getting started: getting-started.md
   - USB Reference: USB.md
 theme: 
   name: material
