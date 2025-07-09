@@ -1,3 +1,5 @@
+use crate::usbcompiler::errors::error::LexerError;
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum TokenKind {
     // Add more token variants as needed
@@ -47,13 +49,14 @@ impl Span {
         };
     }
 }
-struct Lexer {
+pub struct Lexer {
     input: Vec<char>,
     position_flat: usize,
     position_span: Span,
     current_char: Option<char>,
 }
 
+type TokenRecognizer = fn(&mut Lexer, char) -> Result<Option<Token>, LexerError>;
 impl Lexer {
     ///creates a new USB Lexer given a string to tokenize and an optional character start position
     pub fn new(script: String) -> Self {
@@ -107,7 +110,7 @@ impl Lexer {
         }
 
         return Some((
-            Span::new(start_line, start_col, total.len()),
+            Span::new(start_line, start_col, total.chars().count()),
             last_char_type,
             total,
         ));
@@ -142,7 +145,10 @@ impl Lexer {
             }
         }
 
-        return Some((Span::new(start_line, start_column, total.len()), total));
+        return Some((
+            Span::new(start_line, start_column, total.chars().count()),
+            total,
+        ));
     }
     fn consume_whitespace(&mut self) {
         while let Some(c) = self.current_char {
@@ -162,10 +168,42 @@ impl Lexer {
     fn consume_word(&mut self) -> Option<(Span, CharType, String)> {
         let word = self.peek_word();
         if let Some(w) = word {
-            self.skip(w.2.len());
+            self.skip(w.2.chars().count());
             return Some(w);
         }
         return None;
+    }
+    fn consume_string_literal(&mut self) -> Result<(Span, String), LexerError> {
+        if let Some(c) = self.current_char {
+            if c != '\"' {
+                panic!("consume string called on non string");
+            }
+        }
+
+        let mut literal = String::new();
+        let start_line = self.position_span.line;
+        let start_col = self.position_span.column;
+        while let Some(c) = self.current_char {
+            if c == '\"' {
+                literal.push(c);
+                break;
+            }
+            literal.push(c);
+            self.advance();
+        }
+
+        self.advance();
+
+        if let None = self.current_char {
+            return Err(LexerError::UnterminatedString(Span::new(
+                start_line, start_col, 0,
+            )));
+        }
+
+        return Ok((
+            Span::new(start_line, start_col, literal.chars().count()),
+            literal,
+        ));
     }
     fn advance(&mut self) {
         if self.position_flat < self.input.len() {
@@ -197,9 +235,6 @@ impl Lexer {
             index += 1;
         }
     }
-    pub fn next_token(&mut self) -> Token {
-        todo!();
-    }
 
     fn get_char_type(character: &char) -> CharType {
         return if character.is_whitespace() {
@@ -219,6 +254,76 @@ impl Lexer {
         } else {
             panic!("Invalid symbol detected");
         };
+    }
+    fn get_handlers(&self) -> Vec<TokenRecognizer> {
+        vec![Self::handle_newline]
+    }
+    pub fn next_token(&mut self) -> Result<Option<Token>, LexerError> {
+        self.consume_whitespace();
+
+        let current = match self.current_char {
+            Some(c) => c,
+            None => {
+                return Ok(Some(Token {
+                    kind: TokenKind::EOF,
+                    position_flat: self.position_flat,
+                    position_span: self.position_span.clone(),
+                }));
+            }
+        };
+        let handlers = self.get_handlers();
+        let mut token: Option<Token> = None;
+        for handler in handlers {
+            let result = handler(self, current);
+            match result {
+                Ok(found) => match found {
+                    Some(t) => {
+                        token = Some(t);
+                        break;
+                    }
+                    _ => (),
+                },
+                Err(e) => return Err(e),
+            }
+        }
+
+        if let None = token {
+            return Err(LexerError::InvalidChar(self.position_span.clone(), current));
+        }
+
+        return Ok(token);
+    }
+    pub fn tokenize(&mut self) -> Result<Vec<Token>, Vec<LexerError>> {
+        let mut tokens = Vec::new();
+        let mut errors = Vec::new();
+
+        loop {
+            match self.next_token() {
+                Ok(t) => {
+                    if let Some(t) = t {
+                        tokens.push(t);
+                    } else {
+                        break;
+                    }
+                }
+                Err(e) => errors.push(e),
+            }
+        }
+
+        return Ok(tokens);
+    }
+
+    fn handle_newline(&mut self, character: char) -> Result<Option<Token>, LexerError> {
+        if character != '\n' {
+            return Ok(None);
+        }
+        let token = Some(Token {
+            kind: TokenKind::Newline,
+            position_flat: self.position_flat,
+            position_span: self.position_span.clone(),
+        });
+        self.consume(1);
+        return Ok(token);
     }
 }
 
