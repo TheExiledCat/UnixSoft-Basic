@@ -18,7 +18,7 @@ USB can be installed using either the source code and the `cargo` toolchain or b
 To verify the installation, run:
 
 ```bash
-usbasic --version
+usbasic version
 ```
 
 You should see the installed version printed to stdout

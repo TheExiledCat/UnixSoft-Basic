@@ -24,7 +24,9 @@ jobs:
           pip install mkdocs-material pymdown-extensions
 
       - name: Build MkDocs site
-        run: mkdocs build
+        run: | 
+          cat README.md >> docs/index.md
+          mkdocs build
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4

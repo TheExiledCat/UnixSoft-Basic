@@ -24,3 +24,5 @@ markdown_extensions:
       linenums: true
       linenums_style: table
   - pymdownx.superfences
+  - admonition
+  - pymdownx.snippets
