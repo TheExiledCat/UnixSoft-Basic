@@ -1,0 +1,9 @@
+site_name: UnixSoft-BASIC Reference
+nav:
+  - Home: index.md
+  - Getting started: getting_started.md
+  - API Reference: USB.md
+theme: 
+  name: material
+  palette: 
+    scheme: slate
