@@ -16,6 +16,7 @@ pub enum TokenKind {
     EOF,
 }
 
+#[derive(Debug, Clone, PartialEq)]
 pub struct Token {
     kind: TokenKind,
     position_flat: usize,
@@ -23,7 +24,7 @@ pub struct Token {
 }
 
 #[repr(u8)]
-#[derive(PartialEq, Eq)]
+#[derive(PartialEq, Eq, Debug)]
 enum CharType {
     None = 0,
     Numeric,
@@ -34,7 +35,7 @@ enum CharType {
     Quote,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Span {
     pub line: usize,
     pub column: usize,
@@ -58,7 +59,7 @@ pub struct Lexer {
 
 type TokenRecognizer = fn(&mut Lexer, char) -> Result<Option<Token>, LexerError>;
 impl Lexer {
-    ///creates a new USB Lexer given a string to tokenize and an optional character start position
+    ///creates a new USB Lexer given a string to tokenize. input string is expected to start on the start of a line or statement
     pub fn new(script: String) -> Self {
         let mut lexer = Lexer {
             input: script.chars().collect(),
@@ -93,11 +94,12 @@ impl Lexer {
         let mut peek_pos = 0;
         let mut last_char_type: CharType = CharType::None;
         let mut total = String::new();
+        total.push(c);
         while let Some(c) = self.peek(peek_pos) {
             let new_char_type = Lexer::get_char_type(&c);
             if last_char_type != CharType::None {
                 if last_char_type != new_char_type
-                    && (last_char_type != CharType::Alphabetic
+                    && !(last_char_type == CharType::Alphabetic
                         && new_char_type == CharType::Numeric)
                 {
                     break;
@@ -109,6 +111,11 @@ impl Lexer {
             peek_pos += 1;
         }
 
+        if let Some(last_char) = &total.chars().last() {
+            last_char_type = Lexer::get_char_type(&last_char);
+        }
+
+        println!("Peeked word: {}", total);
         return Some((
             Span::new(start_line, start_col, total.chars().count()),
             last_char_type,
@@ -241,7 +248,7 @@ impl Lexer {
             CharType::Whitespace
         } else if character.is_alphabetic() {
             CharType::Alphabetic
-        } else if character.is_numeric() {
+        } else if character.is_ascii_digit() {
             CharType::Numeric
         } else if APPLESOFT_OPERATORS.contains(&character.to_string().as_str())
             || UNIXSOFT_OPERATORS.contains(&character.to_string().as_str())
@@ -256,7 +263,11 @@ impl Lexer {
         };
     }
     fn get_handlers(&self) -> Vec<TokenRecognizer> {
-        vec![Self::handle_newline]
+        return vec![
+            Self::handle_newline,
+            Self::handle_integer_literal,
+            Self::handle_keyword,
+        ];
     }
     pub fn next_token(&mut self) -> Result<Option<Token>, LexerError> {
         self.consume_whitespace();
@@ -264,11 +275,13 @@ impl Lexer {
         let current = match self.current_char {
             Some(c) => c,
             None => {
-                return Ok(Some(Token {
+                let eof = Ok(Some(Token {
                     kind: TokenKind::EOF,
                     position_flat: self.position_flat,
                     position_span: self.position_span.clone(),
                 }));
+                self.advance();
+                return eof;
             }
         };
         let handlers = self.get_handlers();
@@ -287,13 +300,14 @@ impl Lexer {
             }
         }
 
+        self.advance();
         if let None = token {
             return Err(LexerError::InvalidChar(self.position_span.clone(), current));
         }
 
         return Ok(token);
     }
-    pub fn tokenize(&mut self) -> Result<Vec<Token>, Vec<LexerError>> {
+    pub fn tokenize(&mut self) -> Result<Vec<Token>, (Vec<Token>, Vec<LexerError>)> {
         let mut tokens = Vec::new();
         let mut errors = Vec::new();
 
@@ -301,7 +315,11 @@ impl Lexer {
             match self.next_token() {
                 Ok(t) => {
                     if let Some(t) = t {
+                        let kind = t.kind.clone();
                         tokens.push(t);
+                        if let TokenKind::EOF = kind {
+                            break;
+                        }
                     } else {
                         break;
                     }
@@ -310,6 +328,9 @@ impl Lexer {
             }
         }
 
+        if errors.len() > 0 {
+            return Err((tokens, errors));
+        }
         return Ok(tokens);
     }
 
@@ -322,8 +343,49 @@ impl Lexer {
             position_flat: self.position_flat,
             position_span: self.position_span.clone(),
         });
-        self.consume(1);
         return Ok(token);
+    }
+    fn handle_integer_literal(&mut self, character: char) -> Result<Option<Token>, LexerError> {
+        if !character.is_ascii_digit() {
+            return Ok(None);
+        }
+        println!("Handling integer literal digit: {}", character);
+        let word = self.consume_word();
+        if let Some(tuple) = word {
+            match tuple.1 {
+                CharType::Numeric => (),
+                _ => panic!("unexpected token: {:#?} of type {:#?}", tuple.2, tuple.1),
+            }
+
+            let token = Some(Token {
+                kind: TokenKind::Number(tuple.2),
+                position_flat: self.position_flat,
+                position_span: tuple.0,
+            });
+            return Ok(token);
+        }
+        return Err(LexerError::UnexpectedEof);
+    }
+    fn handle_keyword(&mut self, character: char) -> Result<Option<Token>, LexerError> {
+        if !character.is_ascii_alphabetic() {
+            return Ok(None);
+        }
+        println!("Handling ascii alphabetic for keyword: {}", character);
+
+        let word = self.consume_word();
+
+        if let Some(t) = word {
+            if APPLESOFT_KEYWORDS.contains(&t.2.as_str())
+                || UNIXSOFT_KEYWORDS.contains(&t.2.as_str())
+            {
+                return Ok(Some(Token {
+                    kind: TokenKind::Keyword(t.2),
+                    position_flat: self.position_flat,
+                    position_span: t.0,
+                }));
+            }
+        }
+        return Ok(None);
     }
 }
 
@@ -347,3 +409,68 @@ pub const UNIXSOFT_KEYWORDS: &'static [&'static str] = &[];
 pub const UNIXSOFT_FUNCTIONS: &'static [&'static str] = &[];
 pub const UNIXSOFT_OPERATORS: &'static [&'static str] = &[">=", "<=", "!="];
 pub const UNIXSOFT_DELIMITERS: &'static [&'static str] = &["(", ")", "[", "]", ",", ":"];
+
+#[cfg(test)]
+mod tests {
+    use core::error;
+    use std::result;
+
+    use super::*;
+    fn assert_script_tokens(input: &str, expected_tokens: Vec<TokenKind>) {
+        let mut lexer = Lexer::new(input.into());
+        let result = lexer.tokenize();
+
+        let mut tokens = None;
+        let mut errors: Option<Vec<LexerError>> = None;
+        if let Ok(t) = result {
+            tokens = Some(t);
+        } else if let Err(t) = result {
+            tokens = Some(t.0);
+            errors = Some(t.1)
+        }
+        assert!(
+            errors.is_none(),
+            "Lexer returned one or more errors: {:#?}\nTokens: {:#?}",
+            errors,
+            tokens,
+        );
+
+        let actual_tokens: Vec<TokenKind> =
+            tokens.unwrap().iter().map(|t| t.kind.clone()).collect();
+
+        assert_eq!(expected_tokens, actual_tokens);
+    }
+    #[test]
+    fn test_recognize_simple_keyword() {
+        let input = "10 PRINT 5";
+        let mut lexer = Lexer::new(input.into());
+        let result = lexer.tokenize();
+
+        let mut tokens = None;
+        let mut errors: Option<Vec<LexerError>> = None;
+        if let Ok(t) = result {
+            tokens = Some(t);
+        } else if let Err(t) = result {
+            tokens = Some(t.0);
+            errors = Some(t.1)
+        }
+        assert!(
+            errors.is_none(),
+            "Lexer returned one or more errors: {:#?}\nTokens: {:#?}",
+            errors,
+            tokens,
+        );
+
+        let expected_tokens = vec![
+            TokenKind::Number("10".into()),
+            TokenKind::Keyword("PRINT".into()),
+            TokenKind::Number("5".into()),
+            TokenKind::EOF,
+        ];
+
+        let actual_tokens: Vec<TokenKind> =
+            tokens.unwrap().iter().map(|t| t.kind.clone()).collect();
+
+        assert_eq!(expected_tokens, actual_tokens);
+    }
+}

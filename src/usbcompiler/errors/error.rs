@@ -3,9 +3,11 @@ use crate::usbcompiler::{
     tokenizer::lexer::{Span, Token},
 };
 
+#[derive(Debug)]
 pub enum USBError {
     CompilerError(CompilerError),
 }
+#[derive(Debug)]
 pub enum CompilerError {
     TokenizerError(LexerError),
     ParsingError(ParserError),
@@ -13,6 +15,7 @@ pub enum CompilerError {
     DeclarationError(DeclarationError),
     MiscError(MiscellaneousError),
 }
+#[derive(Debug)]
 pub enum LexerError {
     InvalidChar(Span, char),
     InvalidNumberLiteral(Span, String),
@@ -20,6 +23,7 @@ pub enum LexerError {
     UnexpectedEof,
     InvalidEscapeChar(Span, char),
 }
+#[derive(Debug)]
 pub enum ParserError {
     UnepectedToken {
         span: Span,
@@ -41,6 +45,7 @@ pub enum ParserError {
     },
 }
 
+#[derive(Debug)]
 pub enum SemanticError {
     UndefinedIdentifier {
         token: Token,
@@ -78,10 +83,12 @@ pub enum SemanticError {
         token: Token,
     },
 }
+#[derive(Debug)]
 pub enum DeclarationError {
     MultipleDefinitions { token: Token },
     InvalidSignature { token: Token },
 }
+#[derive(Debug)]
 pub enum MiscellaneousError {
     InvalidConstant {
         token: Token,

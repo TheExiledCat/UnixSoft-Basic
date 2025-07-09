@@ -25,7 +25,8 @@ impl Compiler {
                 tokens = t;
             }
             Err(errs) => errors.extend(
-                errs.into_iter()
+                errs.1
+                    .into_iter()
                     .map(CompilerError::TokenizerError)
                     .collect::<Vec<CompilerError>>(),
             ),
