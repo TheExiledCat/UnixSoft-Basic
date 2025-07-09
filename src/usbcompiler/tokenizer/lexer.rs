@@ -103,10 +103,10 @@ impl Lexer {
         let start_line = self.position_span.line;
         let start_col = self.position_span.column;
         let mut peek_pos = 0;
-        let mut last_char_type: CharType = CharType::None;
+        let mut last_char_type = Lexer::get_char_type(&c);
         let mut total = String::new();
         total.push(c);
-        last_char_type = Lexer::get_char_type(&c);
+
         while let Some(c) = self.peek(peek_pos) {
             let new_char_type = Lexer::get_char_type(&c);
             if last_char_type != CharType::None {
@@ -154,7 +154,7 @@ impl Lexer {
 
         let start_line = self.position_span.line;
         let start_column = self.position_span.column;
-        for i in 0..count {
+        for _i in 0..count {
             if let Some(c) = self.current_char {
                 total.push(c);
                 self.advance();
@@ -192,16 +192,28 @@ impl Lexer {
         return None;
     }
     fn consume_string_literal(&mut self) -> Result<(Span, String), LexerError> {
+        let mut literal = String::new();
         if let Some(c) = self.current_char {
             if c != '\"' {
                 panic!("consume string called on non string");
             }
+            literal.push(c);
         }
 
-        let mut literal = String::new();
         let start_line = self.position_span.line;
         let start_col = self.position_span.column;
+        self.advance();
         while let Some(c) = self.current_char {
+            if c == '\\' {
+                //escape string chars, for now, just store the next char and continue
+                literal.push(c);
+                self.advance();
+                if let Some(n) = self.current_char {
+                    literal.push(n);
+                }
+                self.advance();
+                continue;
+            }
             if c == '\"' {
                 literal.push(c);
                 break;
@@ -209,8 +221,6 @@ impl Lexer {
             literal.push(c);
             self.advance();
         }
-
-        self.advance();
 
         if let None = self.current_char {
             return Err(LexerError::UnterminatedString(Span::new(
@@ -280,6 +290,7 @@ impl Lexer {
     fn get_handlers(&self) -> Vec<TokenRecognizer> {
         return vec![
             Self::handle_newline,
+            Self::handle_string_literal,
             Self::handle_integer_literal,
             Self::handle_operator,
             Self::handle_keyword,
@@ -361,6 +372,19 @@ impl Lexer {
             position_span: self.position_span.clone(),
         });
         return Ok(token);
+    }
+    fn handle_string_literal(&mut self, character: char) -> Result<Option<Token>, LexerError> {
+        if character != '\"' {
+            return Ok(None);
+        }
+        println!("Handling string literal starting with: {}", character);
+
+        let result = self.consume_string_literal()?;
+        return Ok(Some(Token {
+            kind: TokenKind::StringLiteral(result.1),
+            position_flat: self.position_flat,
+            position_span: result.0,
+        }));
     }
     fn handle_integer_literal(&mut self, character: char) -> Result<Option<Token>, LexerError> {
         if !character.is_ascii_digit() {
@@ -472,9 +496,6 @@ pub const UNIXSOFT_DELIMITERS: &'static [&'static str] = &["(", ")", "[", "]", "
 
 #[cfg(test)]
 mod tests {
-    use core::error;
-    use std::result;
-
     use super::*;
     fn assert_script_tokens(input: &str, expected_tokens: Vec<TokenKind>, strip_eof: bool) {
         let mut lexer = Lexer::new(input.into());
@@ -500,7 +521,7 @@ mod tests {
         if strip_eof {
             actual_tokens.no_eof();
         }
-        assert_eq!(expected_tokens, actual_tokens);
+        assert_eq!(actual_tokens, expected_tokens);
     }
     #[test]
     fn test_recognize_simple_keyword() {
@@ -540,6 +561,34 @@ mod tests {
             TokenKind::Number("20".into()),
             TokenKind::Keyword("PRINT".into()),
             TokenKind::Number("10".into()),
+        ];
+        assert_script_tokens(input, expected_tokens, true);
+    }
+    #[test]
+    fn test_string_simple_literals() {
+        let input = "10 PRINT \"Hello, World\"";
+        let expected_tokens = vec![
+            TokenKind::Number("10".into()),
+            TokenKind::Keyword("PRINT".into()),
+            TokenKind::StringLiteral("\"Hello, World\"".into()),
+        ];
+        assert_script_tokens(input, expected_tokens, true);
+    }
+    #[test]
+    fn test_string_escaped_literals() {
+        let input = "10 PRINT \"Hello\\\"World\"";
+        let expected_tokens = vec![
+            TokenKind::Number("10".into()),
+            TokenKind::Keyword("PRINT".into()),
+            TokenKind::StringLiteral("\"Hello\\\"World\"".into()),
+        ];
+        assert_script_tokens(input, expected_tokens, true);
+
+        let input = "10 PRINT \"Hello\\nWorld\"";
+        let expected_tokens = vec![
+            TokenKind::Number("10".into()),
+            TokenKind::Keyword("PRINT".into()),
+            TokenKind::StringLiteral("\"Hello\\nWorld\"".into()),
         ];
         assert_script_tokens(input, expected_tokens, true);
     }
