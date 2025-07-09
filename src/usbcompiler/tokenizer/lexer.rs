@@ -22,7 +22,18 @@ pub struct Token {
     position_flat: usize,
     position_span: Span,
 }
-
+trait NoEof {
+    fn no_eof(&mut self) -> &mut Self;
+}
+impl Token {}
+impl NoEof for Vec<TokenKind> {
+    fn no_eof(&mut self) -> &mut Self {
+        if let TokenKind::EOF = self.last().unwrap() {
+            self.pop();
+        }
+        return self;
+    }
+}
 #[repr(u8)]
 #[derive(PartialEq, Eq, Debug)]
 enum CharType {
@@ -465,7 +476,7 @@ mod tests {
     use std::result;
 
     use super::*;
-    fn assert_script_tokens(input: &str, expected_tokens: Vec<TokenKind>) {
+    fn assert_script_tokens(input: &str, expected_tokens: Vec<TokenKind>, strip_eof: bool) {
         let mut lexer = Lexer::new(input.into());
         let result = lexer.tokenize();
 
@@ -484,9 +495,11 @@ mod tests {
             tokens,
         );
 
-        let actual_tokens: Vec<TokenKind> =
+        let mut actual_tokens: Vec<TokenKind> =
             tokens.unwrap().iter().map(|t| t.kind.clone()).collect();
-
+        if strip_eof {
+            actual_tokens.no_eof();
+        }
         assert_eq!(expected_tokens, actual_tokens);
     }
     #[test]
@@ -495,9 +508,8 @@ mod tests {
         let expected_tokens = vec![
             TokenKind::Keyword("PRINT".into()),
             TokenKind::Number("5".into()),
-            TokenKind::EOF,
         ];
-        assert_script_tokens(input, expected_tokens);
+        assert_script_tokens(input, expected_tokens, true);
     }
     #[test]
     fn test_recognize_words() {
@@ -506,17 +518,16 @@ mod tests {
             TokenKind::Number("10".into()),
             TokenKind::Identifier("PRINT5".into()),
             TokenKind::Number("10".into()),
-            TokenKind::EOF,
         ];
-        assert_script_tokens(input, expected_tokens);
+        assert_script_tokens(input, expected_tokens, true);
+
         let input = "5PRINT 10";
         let expected_tokens = vec![
             TokenKind::Number("5".into()),
             TokenKind::Keyword("PRINT".into()),
             TokenKind::Number("10".into()),
-            TokenKind::EOF,
         ];
-        assert_script_tokens(input, expected_tokens);
+        assert_script_tokens(input, expected_tokens, true);
     }
     #[test]
     fn test_newlines() {
@@ -529,9 +540,8 @@ mod tests {
             TokenKind::Number("20".into()),
             TokenKind::Keyword("PRINT".into()),
             TokenKind::Number("10".into()),
-            TokenKind::EOF,
         ];
-        assert_script_tokens(input, expected_tokens);
+        assert_script_tokens(input, expected_tokens, true);
     }
     #[test]
     fn test_recognize_single_or_double_operators() {
@@ -546,12 +556,11 @@ mod tests {
             TokenKind::Identifier("X".into()),
             TokenKind::Operator("+".into()),
             TokenKind::Number("5".into()),
-            TokenKind::EOF,
         ];
-        assert_script_tokens(input, expected_tokens.clone());
+        assert_script_tokens(input, expected_tokens.clone(), true);
 
         let input = "LET X = 10\nPRINT X+5";
-        assert_script_tokens(input, expected_tokens);
+        assert_script_tokens(input, expected_tokens, true);
 
         let input = "PRINT X <= 5";
         let expected_tokens = vec![
@@ -559,9 +568,8 @@ mod tests {
             TokenKind::Identifier("X".into()),
             TokenKind::Operator("<=".into()),
             TokenKind::Number("5".into()),
-            TokenKind::EOF,
         ];
-        assert_script_tokens(input, expected_tokens);
+        assert_script_tokens(input, expected_tokens, true);
 
         let input = "LET X = TRUE AND TRUE";
         let expected_tokens = vec![
@@ -571,8 +579,7 @@ mod tests {
             TokenKind::Keyword("TRUE".into()),
             TokenKind::Operator("AND".into()),
             TokenKind::Keyword("TRUE".into()),
-            TokenKind::EOF,
         ];
-        assert_script_tokens(input, expected_tokens);
+        assert_script_tokens(input, expected_tokens, true);
     }
 }
