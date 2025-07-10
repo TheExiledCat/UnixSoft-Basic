@@ -103,13 +103,14 @@ fn create_project_directory(dir: PathBuf) {
     "#,
     )
     .unwrap();
+    fs::write(&dir.join(".gitignore"), "obj\nbuild\n").unwrap();]
 }
 pub fn generate_default_project(dir: PathBuf) {
     let dir = relative_to_absolute(dir);
 
     // generate directory if it doesnt exist yet
     if let Ok(exists) = fs::exists(&dir) {
-        if (exists) {
+        if exists {
             if !&dir.is_dir() {
                 panic!("expected directory")
             }

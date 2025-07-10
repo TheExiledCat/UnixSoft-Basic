@@ -66,6 +66,12 @@ UnixSoft basic is a modern rendition of the AppleSoft BASIC language, written an
 
 -   and more :)
 
+## Vision
+
+My goal with this language is both to learn how to make a programming language for myself, but also to create a simple language easy to use for beginners, as BASIC was supposed to be as well. However i want a version of BASIC that matches the modern era, with modern features, and a modern syntax. I also want to make it easy to do more complex things without complicated syntax for people who want to make bigger applications
+
+For my full motivation see [Personal vision](https://theexiledcat.github.io/UnixSoft-Basic/personal-vision.html)
+
 ## Documentation and guides
 
 For the full spec see [USB](https://theexiledcat.github.io/UnixSoft-Basic/USB.html)
