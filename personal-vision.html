@@ -1,0 +1,524 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://theexiledcat.github.io/UnixSoft-Basic/personal-vision.html">
+      
+      
+      
+      
+      <link rel="icon" href="assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.15">
+    
+    
+      
+        <title>UnixSoft Basic — Full Summary & Development Plan - UnixSoft-BASIC Reference</title>
+      
+    
+    
+      <link rel="stylesheet" href="assets/stylesheets/main.342714a4.min.css">
+      
+        
+        <link rel="stylesheet" href="assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#unixsoft-basic-full-summary-development-plan" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="index.html" title="UnixSoft-BASIC Reference" class="md-header__button md-logo" aria-label="UnixSoft-BASIC Reference" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            UnixSoft-BASIC Reference
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              UnixSoft Basic — Full Summary &amp; Development Plan
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="index.html" title="UnixSoft-BASIC Reference" class="md-nav__button md-logo" aria-label="UnixSoft-BASIC Reference" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    UnixSoft-BASIC Reference
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting-started.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting started
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="guide.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Guide
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="USB.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    USB Reference
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="unixsoft-basic-full-summary-development-plan">UnixSoft Basic — Full Summary &amp; Development Plan</h1>
+<hr />
+<h2 id="1-starting-point-applesoft-basic">1. Starting Point: Applesoft BASIC</h2>
+<ul>
+<li><strong>Applesoft BASIC features:</strong><ul>
+<li>Line-numbered, interpreted.</li>
+<li>Limited data types: mainly numeric (floats by default) and strings.</li>
+<li>No static typing or type annotations.</li>
+<li>Control flow uses line numbers for jumps.</li>
+<li>No native scoping blocks; <code>END</code> keyword terminates program.</li>
+<li>Dynamic typing with implicit casting.</li>
+</ul>
+</li>
+</ul>
+<hr />
+<h2 id="2-my-vision-modernizing-applesoft-basic">2. My Vision: Modernizing Applesoft BASIC</h2>
+<h3 id="key-changes-improvements-i-want">Key changes &amp; improvements i want:</h3>
+<ul>
+<li><strong>Compiled to native x64 (Linux) assembly</strong>, no interpreter or JIT.</li>
+<li><strong>Static typing</strong> with optional type inference and type annotations.</li>
+<li><strong>Structured control flow</strong> using block keywords along with the original line numbers.</li>
+<li>Introduce block scoping <strong>outside control flow</strong> for local variables.</li>
+<li>Add <strong><code>BEGIN</code> / <code>FIN</code></strong> keywords for explicit scope blocks. (think of these like {} in modern languages)</li>
+<li>Use <strong><code>LET</code></strong> for variable assignments (instead of <code>DIM</code>) but enforce type annotation or assignment.</li>
+<li>Support <strong>true/false keywords</strong> for boolean values.</li>
+<li>Implement <strong>type casting rules</strong> compatible with static typing.</li>
+<li>Keep code output <strong>efficient and small</strong>.</li>
+<li>Target <strong>Linux x64</strong> (System V AMD64 ABI) with plans to possibly support ARM64 in the future.</li>
+<li>Add <strong>IO improvements</strong> (better input/output handling more similar to modern libc).</li>
+</ul>
+<hr />
+<h2 id="3-ast-and-compiler-architecture">3. AST and Compiler Architecture</h2>
+<ul>
+<li>Use an AST node called <code>Scope</code> to represent <code>BEGIN</code> / <code>FIN</code> blocks.</li>
+<li>Each <code>Scope</code> node holds a list of inner AST nodes (statements).</li>
+<li>Symbol tables are scoped per <code>Scope</code> node to handle local variables and type checking.</li>
+<li>Static typing allows:<ul>
+<li>Compile-time type inference.</li>
+<li>Type annotations (<code>LET X = 5</code> or <code>LET X AS INTEGER</code> (defaults to 0)).</li>
+</ul>
+</li>
+<li>Codegen:<ul>
+<li>Allocate stack space per scope.</li>
+<li>Use native registers (integer: rax, rbx, etc; float: xmm0, xmm1, etc).</li>
+<li>Compile line numbers to labels if supporting legacy syntax, but aim to move away from line-number-driven flow.</li>
+</ul>
+</li>
+<li>Handle floating-point operations using SSE instructions (<code>movsd</code>, <code>addsd</code>, etc).</li>
+<li>Pass floats in xmm registers per calling convention.</li>
+<li>For printing floats, integrate or write float-to-string conversion routines.</li>
+</ul>
+<hr />
+<h2 id="4-syntax-suggestions-keywords">4. Syntax Suggestions &amp; Keywords</h2>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Keyword(s)</th>
+<th>Notes/Changes vs Applesoft</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Variable declaration</td>
+<td><code>LET</code></td>
+<td>Enforce assignment ortype</td>
+</tr>
+<tr>
+<td>Block scoping</td>
+<td><code>BEGIN</code> / <code>FIN</code></td>
+<td>New keywords to define scope blocks</td>
+</tr>
+<tr>
+<td>Boolean literals</td>
+<td><code>TRUE</code>, <code>FALSE</code></td>
+<td>Map to 1 and 0</td>
+</tr>
+<tr>
+<td>Control flow blocks</td>
+<td><code>IF ... THEN BEGIN</code> / <code>FI</code> or <code>FIN</code></td>
+<td>Use blocks instead of line jumps, but leaving support for <code>IF ... GOTO</code></td>
+</tr>
+<tr>
+<td>End program</td>
+<td><code>END</code></td>
+<td>Same as Applesoft, terminate program</td>
+</tr>
+<tr>
+<td>Type annotations</td>
+<td><code>LET X AS FLOAT = 5</code></td>
+<td>Explicit static typing</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="5-runtime-and-execution">5. Runtime and Execution</h2>
+<ul>
+<li>The compiler outputs native <strong>x64 assembly</strong>.</li>
+<li>Follow the <strong>System V AMD64 calling convention</strong>.</li>
+<li>Stack frames per scope for local variables.</li>
+<li>Use SSE for float arithmetic.</li>
+<li>Compile boolean logic with 0/1 values.</li>
+<li>Provide minimal runtime for IO (input, output) with improvements over Applesoft.</li>
+<li>Handle float-to-string conversions for printing.</li>
+</ul>
+<hr />
+<h2 id="6-development-roadmap">6. Development Roadmap</h2>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Description</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Parser</strong></td>
+<td>Write grammar supporting <code>LET</code>, <code>BEGIN</code>/<code>FIN</code>, <code>IF...THEN...</code>, <code>FI</code>, <code>TRUE</code>, <code>FALSE</code></td>
+<td>Define AST nodes (Scope, Let, If, etc)</td>
+</tr>
+<tr>
+<td><strong>AST Construction</strong></td>
+<td>Build <code>Scope</code> nodes with nested statements</td>
+<td>Symbol table stack per scope</td>
+</tr>
+<tr>
+<td><strong>Type System</strong></td>
+<td>Implement static typing and type inference</td>
+<td>Support explicit type annotations</td>
+</tr>
+<tr>
+<td><strong>Code Generation</strong></td>
+<td>Compile AST to x64 assembly</td>
+<td>Manage registers, stack frames, labels</td>
+</tr>
+<tr>
+<td><strong>Floating-point Support</strong></td>
+<td>Use SSE instructions for float operations</td>
+<td>movsd, addsd, etc</td>
+</tr>
+<tr>
+<td><strong>IO Routines</strong></td>
+<td>Build or link runtime for input/output</td>
+<td>Float-to-string, improved console IO</td>
+</tr>
+<tr>
+<td><strong>Testing</strong></td>
+<td>Write BASIC test programs</td>
+<td>Compare against Applesoft behaviors, new features</td>
+</tr>
+<tr>
+<td><strong>Optimization</strong></td>
+<td>Keep compiled output small and efficient</td>
+<td>Reuse registers and stack space</td>
+</tr>
+</tbody>
+</table>
+<hr />
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": ".", "features": ["toc.integrate", "toc.follow", "navigation.top", "navigation.tracking", "navigation.expand", "navigation.path", "navigation.footer", "navigation.sections"], "search": "assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="assets/javascripts/bundle.56ea9cef.min.js"></script>
+      
+    
+  </body>
+</html>
