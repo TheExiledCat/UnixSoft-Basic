@@ -78,11 +78,11 @@
 ## 6. Development Roadmap
 
 | Step                       | Description                                                                          | Notes                                             |
-| -------------------------- | ------------------------------------------------------------------------------------ | ------------------------------------------------- | --- |
+| -------------------------- | ------------------------------------------------------------------------------------ | ------------------------------------------------- |
 | **Parser**                 | Write grammar supporting `LET`, `BEGIN`/`FIN`, `IF...THEN...`, `FI`, `TRUE`, `FALSE` | Define AST nodes (Scope, Let, If, etc)            |
 | **AST Construction**       | Build `Scope` nodes with nested statements                                           | Symbol table stack per scope                      |
 | **Type System**            | Implement static typing and type inference                                           | Support explicit type annotations                 |
-| **Code Generation**        | Compile AST to x64 assembly                                                          | Manage registers, stack frames, labels            | [I    |
+| **Code Generation**        | Compile AST to x64 assembly                                                          | Manage registers, stack frames, labels            |
 | **Floating-point Support** | Use SSE instructions for float operations                                            | movsd, addsd, etc                                 |
 | **IO Routines**            | Build or link runtime for input/output                                               | Float-to-string, improved console IO              |
 | **Testing**                | Write BASIC test programs                                                            | Compare against Applesoft behaviors, new features |
