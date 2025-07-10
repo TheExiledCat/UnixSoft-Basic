@@ -208,6 +208,18 @@ A lot of redundant functionality has been either added on top of. Or an alternat
             LET Y - TYPE (X) // Gets replaced with INTEGER at compile time
             PRINT Y //INTEGER
             ```
+    -   #### ENUM
+        -   Syntax: `ENUM <name> = <key1 [value1]> [, ...]`
+        -   Define a C style enum where every key is mapped to a constant integer value
+        -   The values for each key can be inferred (starting at 0) but must be annotated if the order is not sequential
+        -   Example:
+            ```basic
+            ENUM direction = UP, DOWN, LEFT, RIGHT // 0, 1, 2, 3
+            ENUM job = FASTFOOD 2, TEACHER, DOCTOR // 2, 3, 4
+            ENUM class = ROGUE 2, WARRIOR 5 , MAGE // 2, 5, 6
+            ENUM color = CYAN 2, GREEN 0, BLUE // Error, value must be given if not sequential
+            ```
+        -   Note: Enums in USB are nothing but named integers. that means that you can use them in any place where an integer is expected. Enums are not a type, just syntactic sugar. whenever a value is annotated with `AS <MYENUM>` it will just become an integer with the value of the enum. Default values of enum typed variables are the first keys value in the enum. Casting between integers and enum types is implicit
 
 2.  ### Flow
 
@@ -260,10 +272,17 @@ A lot of redundant functionality has been either added on top of. Or an alternat
         -   When used with functions can optionally return a value
     -   #### MENU
 
-        -   Syntax: `MENU <expression> {<statement1> [<statement2> ...] | {GOTO | GOSUB } linenumber1 [ , linenumber2, ...}`
+        -   Syntax: `MENU <expression> {<statement1> [,<statement2> ,...] | {GOTO | GOSUB } linenumber1 [ , linenumber2, ...}`
         -   A modern replacement of the `ON`command from applesoft.
         -   When used with an expression, calls one of the statements given where _expression's_ value is the index of the statement to use (1 based)
         -   When used with either a `GOTO`or a `GOSUB` statement, instead pass a comma seperated list of linenumbers (can be aliased) to jump to.
+        -   Example:
+            ```basic
+            LET X = INT(INPUT "Fill in a number from 1 - 3\n> ")
+            MENU X PRINT "Hello", GOTO 10, GOSUB 20
+            or
+            MENU X GOTO 10, 20, 30
+            ```
 
     -   #### FOR
 
@@ -271,6 +290,12 @@ A lot of redundant functionality has been either added on top of. Or an alternat
         -   starts a C-style for loop.
 
         -   after the paramaters for the for loop are given can either call any statements until a `NEXT` call or given a Scope which will automatically call `NEXT` at the end.
+        -   Example:
+            ```basic
+            FOR I = 0, i < 10, I += 1
+            PRINT I
+            NEXT
+            ```
 
     -   #### FOR
 
@@ -278,15 +303,31 @@ A lot of redundant functionality has been either added on top of. Or an alternat
         -   Original Applesoft for loop. can be used with both floats and integers.
 
         -   Also supports scopes or next like the C style loop
+        -   Example:
+
+            ```basic
+            FOR I = 0 TO 10 STEP 1
+            PRINT I
+            NEXT
+
+            ```
 
     -   #### NEXT
 
         -   Syntax `NEXT [count]`
-        -   Forces a loop to continue from its start.
+        -   Forces a loop to continue from its start with its step incremented _count_ times. If no count is given, it will increment by 1 or the loops STEP value.
 
-        -   when used with for loops, _count_ can be used to specify how many times to call the step size or the C style end of loop statement.
+        -   when used with for loops, _count_ can be used to specify how many times to call the step size or the C style end of loop statement. If a negative value is given a runtime error will occur
 
         -   will error if used outside of a loop context.
+        -   Example:
+
+            ```basic
+            FOR I = 0 TO 10 STEP 1
+            PRINT I
+            IF I > 5 THEN NEXT 3 // increment I by 3 * STEP
+            NEXT
+            ```
 
     -   #### IF
 
@@ -298,27 +339,73 @@ A lot of redundant functionality has been either added on top of. Or an alternat
             -   GOTO or GOSUB: jump to a line using the logic in GOTO or GOSUB
 
             -   IF can also be given a scope using `BEGIN`and `FIN` to call when the if statement is true
+            -   Example:
+                ```basic
+                LET X = 10
+                IF X >= 5 THEN PRINT X
+                IF X >= 5 GOTO 100
+                IF X >= 5 GOSUB 100
+                IF X >= 5 BEGIN
+                PRINT X
+                PRINT X * 2
+                FIN
+                ```
 
     -   #### END
 
-        -   Terminate the program early and cleanly
+        -   Terminate the program early and cleanly with a 0 statuscode
 
         -   Every script has an invisible `END` at the end of it. Hence this is mostly used for early returns
+        -   Example:
+            ```basic
+            LET X = 10
+            IF X >= 5 THEN END
+            PRINT X
+            ```
 
     -   #### STOP
         -   Syntax: `STOP <errorcode>`
         -   Terminate the program early with the given error code
+        -   Example:
+            ```basic
+            LET X = INT("10q") // format error, ERR gets value mapped to that
+            IF ERR > 0 STOP ERR // Terminate program with error code
+            PRINT X
+            ```
 
 3.  ### Error Handling
+
+    Error handling in USB is a bit different from other programming languages. It uses a special variable called `ERR` to store the error code . The `ERR` variable can be used to check if an error occurred and what the error code is. The `ERR` variable is automatically set to the error code when an error occurs.
+
+    Instead of a recursive backtracking approach to errors where nested scopes are unwound, errors in USB are global and linear. This means that handling errors in USB is a bit simpler and limited than other languages.
+
+    Heres how to write error handlers and create your own errors:
 
     -   #### ONERR
 
         -   Syntax: `ONERR <statement>`
         -   Sets the current error handler to a given statement. If a built in function throws an error or the `THROW` keyword is used, the error handler is called and the error code is passed into the `ERR` global variable
+        -   Example (Retry mechanism for input):
+
+            ```basic
+            5 ONERR PRINT ERR, GOTO 10
+            10 LET X = INT(INPUT "Fill in a number\n> ") // if format error, ERR gets value mapped to that
+            20 PRINT X
+            ```
+
+        -   Note: ONERR is nothing but a label for a statement, whenever THROW is used, GOSUB ONERR is called. If ONERR is a single statement the RET at the end is inferred, otherwise a RET is needed.
 
     -   #### THROW
         -   Syntax: `THROW <code>`
         -   Trigger the `ONERR` handler and store _code_ into `ERR`
+        -   _code_ must be a positive integer greater than 0
+        -   Example:
+            ```basic
+            ONERR PRINT "Something went wrong. Errorcode: {}", ERR
+            LET X = 5
+            IF X < 10 THEN THROW 100
+            // after ONERR is called, program continues here
+            ```
 
 4.  ### User I/O
 
