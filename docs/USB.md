@@ -43,7 +43,7 @@ These expand into the following:
     -   Assignments (`LET X = 10`)
     -   Keywords (`PRINT, FOR, IF ...`)
     -   Function calls
-    -   Definitions (`DEF MyLambda x, y = x \* y)
+    -   Definitions (`DEF MyLambda x, y = x * y`)
     -   More...
 
 ### Differences from AppleSoft-BASIC
@@ -441,6 +441,11 @@ A lot of redundant functionality has been either added on top of. Or an alternat
             ```
         -   Note: `PENUM` generates an array of strings at compile time storing every stringified version of the enum value. This array is then used at runtime to print the correct string. If you used no PENUM calls in your code or on a specific enum, this array is not generated for that code or enum. You can use this fact to reduce binary size
 
+    -   #### POPTIONS
+        -   Syntax: `POPTIONS <OPTION>, <expression> [,expression, ...] <prompt>`
+        -   Presents the user with a menu of options, allowing them to select one by entering its number. The last argument is the prompt to display under the menu.
+        -   Works similar to INPUT under the hood, returning the value of the chosen option, but as an integer so it can be used with `MENU` very easily.
+        -   Example: See [Creating a menu](guide.md#creating-a-selection-menu)
     -   #### INPUT
 
         -   Syntax: `INPUT [prompt]`

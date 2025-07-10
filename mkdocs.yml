@@ -4,6 +4,7 @@ use_directory_urls: false
 nav:
   - Home: index.md
   - Getting started: getting-started.md
+  - Guide: guide.md
   - USB Reference: USB.md
 theme: 
   name: material
