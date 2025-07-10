@@ -427,11 +427,26 @@ A lot of redundant functionality has been either added on top of. Or an alternat
             Hello Kevin!
             ```
 
+    -   #### PENUM
+
+        -   Syntax: `PENUM <ENUM>, <expression>`
+        -   Prints the given expression as if it were part of an enumeration.
+        -   Will throw an error if used on a non number value. floats are rounded down before checked.
+        -   Example:
+            ```basic
+            ENUM direction = NORTH, EAST, SOUTH, WEST
+            LET X = NORTH
+            PRINT X // 0
+            PENUM direction, X // NORTH
+            ```
+        -   Note: `PENUM` generates an array of strings at compile time storing every stringified version of the enum value. This array is then used at runtime to print the correct string. If you used no PENUM calls in your code or on a specific enum, this array is not generated for that code or enum. You can use this fact to reduce binary size
+
     -   #### INPUT
 
         -   Syntax: `INPUT [prompt]`
         -   Reads a line from `STDIN`
         -   Can be given an optional prompt to show the user
+        -   Hangs till input is given
         -   Used as a function, returns the line read from `STDIN`
         -   Example:
 
@@ -447,3 +462,37 @@ A lot of redundant functionality has been either added on top of. Or an alternat
             > 5
             5
             ```
+
+    -   #### GET
+
+        -   Syntax: `GET [prompt]`
+        -   Reads a single key from `STDIN`
+        -   Hangs till input is given
+        -   Optionally prints the prompt first
+        -   Returns the pressed key as a single character string the moment it is pressed.
+        -   Example:
+            ```basic
+            LET X$ = GET "Press any key to continue (q to quit)"
+            IF X$ == "q" THEN END
+            // ... other code
+            ```
+
+    -   #### HOME
+
+        -   Syntax: `HOME`
+        -   Clears the screen
+
+    -   #### HTAB and VTAB
+
+        -   Syntax: `HTAB <expression>` or `VTAB <expression>`
+        -   Sets the horizontal or vertical position of the cursor on the `STDOUT` buffer.
+        -   top left is (0,0)
+        -   Values greater than the screen size are clamped to the size of the screen
+        -   To see the size of the screen buffer, see `SCREEN` command
+
+    -   #### FLASH
+        -   Syntax: `FLASH <expression>`
+        -   Sets the cursor flash to the boolean evaluation of the expression
+
+5.  ### GRAPHICS
+    -
