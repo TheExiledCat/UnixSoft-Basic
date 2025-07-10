@@ -55,149 +55,308 @@ A lot of redundant functionality has been either added on top of. Or an alternat
 
 -   Optional linenumbers
 
-```basic
-      10 PRINT X // numbered lines
-      LET A = 10 // Line inferred by position (11)
-      LET B = 20 // Same here (12). In a fully unnumbered file the line numbers start at 1
-```
+    ```basic
+        10 PRINT X // numbered lines
+        LET A = 10 // Line inferred by position (11)
+        LET B = 20 // Same here (12). In a fully unnumbered file the line numbers start at 1
+    ```
 
 -   Note this does come with a drawback for the compilers resolver:
 
-```basic
-    10 PRINT X //(10)
-    LET A = 10 //(11) Inferred
-    11 PRINT Y //(11) Compiler error: duplicate statement
-```
+    ```basic
+        10 PRINT X //(10)
+        LET A = 10 //(11) Inferred
+        11 PRINT Y //(11) Compiler error: duplicate statement
+    ```
 
 -   Scopes:
 
-```basic
- BEGIN
- LET X = 5
- PRINT X
- FIN
+    ```basic
+    BEGIN
+    LET X = 5
+    PRINT X
+    FIN
 
- PRINT X //undefined token error
-```
+    PRINT X //undefined token error
+    ```
 
-```basic
-  IF X < 5 BEGIN
-  // statements....
-  FIN
-```
+    ```basic
+    IF X < 5 BEGIN
+    // statements....
+    FIN
+    ```
 
 -   `;` instead of `:` for statement seperating
 
-```basic
-  LET X = 10; PRINT X
-```
+    ```basic
+    LET X = 10; PRINT X
+    ```
 
 -   Note: A single statement cant be spread over multiple lines, Commands are defined as a single line till `\n` or a `;` seperated list of statements
 
 ## Statements
 
-1. ### Variable Control
+1.  ### Variable Control
 
-    - #### CLEAR
+    -   #### CLEAR
 
-        - Syntax: `CLEAR`
-        - `Clear all global static variables`
+        -   Syntax: `CLEAR`
+        -   Clear all global static variables
+        -   Note that 'Clearing' in USB means resetting the variables to their default values (e.g. 0 for numbers, "" for strings)
+        -   Example:
 
-    - #### CSCOPE
+            ```basic
+            LET X = 10
+            LET Y = TRUE
 
-        - Syntax: `CLEAR`
-        - `Same as above, but only clears variables in the current scope`
+            CLEAR
 
-    - #### DIM
+            PRINT X
+            PRINT Y
+            ```
 
-        - Syntax: `DIM <name> (columns [,rows]) [AS <DATATYPE>]`
-        - `Define array with specified width and height (or single dimension if left empty)` .
-        - Infers datatype when assigned if not annotated.
+            Output
 
-    - #### DEF
+            ```console
+            0
+            FALSE
+            ```
 
-        - Syntax: `DEF <name> [param1, param2 , ...] = _expression`
-        - `Define a lambda function. This lambda can only return a single datatype.`
+    -   #### CSCOPE
 
-    - #### LET
+        -   Syntax: `CLEAR`
+        -   `Same as above, but only clears variables in the current scope`
+        -   Example:
 
-        - Syntax: `LET {<name> | <name> = <expression> | <name> AS <DATATYPE> | <name> = <expression> AS <DATATYPE>}`
-        - `Declare and optionally assign a new variable.`. Infers datatype if not annotated.
+            ```basic
+            LET X = 10
 
-    - **NOTE**: LET, DEF and DIM:
+            BEGIN
+            LET Y = 20
+            CSCOPE
+            PRINT X
+            PRINT Y
+            ```
 
-        - Assignments using `=`can only be used on variables already created using their respective keyword, you can NOT assign as declaration. E.g. `X = 5`without using `LET X` beforehand. This will throw a undefined variable error on compilation
+            Output:
 
-2. ### Flow
+            ```console
+            10
+            0
+            ```
 
-    - #### GOTO
+    -   #### DIM
 
-        - Syntax: `GOTO { linenumber | alias linenumber }`
-        - Jump to the specified line or line in a file imported using _alias_
+        -   Syntax: `DIM <name> (columns [,rows]) [AS <DATATYPE>]`
+        -   Define array with specified width and height (or single dimension if left empty) .
+        -   Infers datatype when assigned if not annotated.
+        -   Example:
 
-    - #### GOSUB
+            ```basic
+            DIM arr(10) AS INTEGER // define an  integer array, containing only 10 0's
+            arr[0] = 100
+            PRINT arr[0]
 
-        - Same as `GOTO` but push onto the function stack and jump to sub routine. Expects a `RET` or `END` somewhere in the Sub routine
-        - `RET` can not return a value when using `GOSUB`. However global variables can be edited by the subroutine. For proper functions see [`FN`](#fn)
+            //Inferred type
+            DIM arr1(10)
+            arr1[0] = 100
+            PRINT TYPE (arr1[0]) // prints INTEGER
 
-    - #### MENU
+            //Indexing multiple dimensions:
+            DIM arr2(10, 10) AS INTEGER
+            arr2[0][0] = 100 //First array stores the rows, second indexer selects a column from that row
+            ```
 
-        - Syntax: `MENU <expression> {<statement1> [<statement2> ...] | {GOTO | GOSUB } linenumber1 [ , linenumber2, ...}`
-        - A modern replacement of the `ON`command from applesoft.
-        - When used with an expression, calls one of the statements given where _expression's_ value is the index of the statement to use (1 based)
-        - When used with either a `GOTO`or a `GOSUB` statement, instead pass a comma seperated list of linenumbers (can be aliased) to jump to.
+    -   #### DEF
 
-    - #### FOR
+        -   Syntax: `DEF <name> [param1, param2 , ...] = <expression>`
+        -   Define a lambda function. This lambda can only return a single datatype.
+        -   Example:
+            ```basic
+            DEF square x = x*x
+            PRINT square(5) // prints 25
+            ```
 
-        - Syntax: `FOR <temp-var> = <expression>, <condition>, <step-action> = <statement> { [statement1 [, statement2, ...] NEXT] | <scope>}`
-        - starts a C-style for loop.
+    -   #### LET
 
-        - after the paramaters for the for loop are given can either call any statements until a `NEXT` call or given a Scope which will automatically call `NEXT` at the end.
+        -   Syntax: `LET {<name> | <name> = <expression> | <name> AS <DATATYPE> | <name> = <expression> AS <DATATYPE>}`
+        -   Declare and optionally assign a new variable.
+            Infers datatype if not annotated.
+        -   Example:
 
-    - #### FOR
+            ```basic
+            LET X = 10 // Declare and assign, Infers datatype
 
-        - Syntax: `<temp-var> = <number-expression> TO <number target> [STEP stepsize] {statement1 [, statement2, ...] NEXT | <scope>}`
-        - Original Applesoft for loop. can be used with both floats and integers.
+            LET Y AS FLOAT = 10 // Declare and assign with datatype
+            //or
+            LET Y = 10 AS FLOAT // Declare and assign with datatype
 
-        - Also supports scopes or next like the C style loop
+            LET Z AS FLOAT //Default value of datatype is assigned, e.g. 0.0
+            ```
 
-    - #### NEXT
+    -   **NOTE**: LET, DEF and DIM:
 
-        - Syntax `NEXT [count]`
-        - Forces a loop to continue from its start.
+        -   Assignments using `=`can only be used on variables already created using their respective keyword, you can NOT assign as declaration. E.g. `X = 5`without using `LET X` beforehand. This will throw a undefined variable error on compilation
 
-        - when used with for loops, _count_ can be used to specify how many times to call the step size or the C style end of loop statement.
+    -   #### TYPE
+        -   Syntax: `TYPE <expression>`
+        -   Returns the type of the expression as a string, mostly used for debugging purposes
+        -   This is a compile time operation as it only works on expressions with a known return type at compile time. It just stores the type annotation as a constant string.
+        -   Example
+            ```basic
+            LET X = 5
+            LET Y - TYPE (X) // Gets replaced with INTEGER at compile time
+            PRINT Y //INTEGER
+            ```
 
-        - will error if used outside of a loop context.
+2.  ### Flow
 
-    - #### IF
+    -   #### GOTO
 
-        - Syntax: `IF <expression> {THEN <statement> | GOTO | GOSUB | <scope>}`
-        - if expression is true perform the following:
+        -   Syntax: `GOTO { linenumber | alias, linenumber }`
+        -   Jump to the specified line or line in a file imported using _alias_
+        -   Example (Prints the current date and time to the console permanently):
 
-            - THEN: perform a single statement
+            ```basic
+            10 PRINT DATE
+            GOTO 10
 
-            - GOTO or GOSUB: jump to a line using the logic in GOTO or GOSUB
+            // used with an alias
+            IMPORT "my_lib.usb" AS MYLIB
+            GOTO MYLIB, 10
 
-            - IF can also be given a scope using `BEGIN`and `FIN` to call when the if statement is true
+            //my_lib.usb
+            10 PRINT "Hello from my_lib.usb"
+            ```
 
-    - #### END
+    -   #### GOSUB
 
-        - Terminate the program early and cleanly
+        -   Same as `GOTO` but push onto the function stack and jump to sub routine. Expects a `RET` or `END` somewhere in the Sub routine
+        -   `RET` can not return a value when using `GOSUB`. However global variables can be edited by the subroutine. For proper functions see [`FN`](#fn)
+        -   Example:
 
-        - Every script has an invisible `END` at the end of it. Hence this is mostly used for early returns
+            ```basic
+            10 GOSUB 30
+            20 PRINT "BYE"
 
-    - #### STOP
-        - Syntax: `STOP <errorcode>`
-        - Terminate the program early with the given error code
+            30 LET X$ = INPUT "Fill in your name\n> "
+            40 PRINT "Hello " + X$
+            50 RET
+            ```
 
-3. ### Error Handling
+            Output:
 
-    - #### ONERR
+            ```console
+            Fill in your name
+            > John
+            Hello John
+            BYE
+            ```
 
-        - Syntax: `ONERR <statement>`
-        - Sets the current error handler to a given statement. If a built in function throws an error or the `THROW` keyword is used, the error handler is called and the error code is passed into the `ERR` global variable
+    -   #### RET
+        -   Syntax: `RET [expression]`
+        -   Return from a subroutine or function
+        -   Pops from the call stack and returns to the line Popped
+        -   When used with functions can optionally return a value
+    -   #### MENU
 
-    - #### THROW
-        - Syntax: `THROW <code>`
-        - Trigger the `ONERR` handler and store _code_ into `ERR`
+        -   Syntax: `MENU <expression> {<statement1> [<statement2> ...] | {GOTO | GOSUB } linenumber1 [ , linenumber2, ...}`
+        -   A modern replacement of the `ON`command from applesoft.
+        -   When used with an expression, calls one of the statements given where _expression's_ value is the index of the statement to use (1 based)
+        -   When used with either a `GOTO`or a `GOSUB` statement, instead pass a comma seperated list of linenumbers (can be aliased) to jump to.
+
+    -   #### FOR
+
+        -   Syntax: `FOR <temp-var> = <expression>, <condition>, <step-action> = <statement> { [statement1 [, statement2, ...] NEXT] | <scope>}`
+        -   starts a C-style for loop.
+
+        -   after the paramaters for the for loop are given can either call any statements until a `NEXT` call or given a Scope which will automatically call `NEXT` at the end.
+
+    -   #### FOR
+
+        -   Syntax: `<temp-var> = <number-expression> TO <number target> [STEP stepsize] {statement1 [, statement2, ...] NEXT | <scope>}`
+        -   Original Applesoft for loop. can be used with both floats and integers.
+
+        -   Also supports scopes or next like the C style loop
+
+    -   #### NEXT
+
+        -   Syntax `NEXT [count]`
+        -   Forces a loop to continue from its start.
+
+        -   when used with for loops, _count_ can be used to specify how many times to call the step size or the C style end of loop statement.
+
+        -   will error if used outside of a loop context.
+
+    -   #### IF
+
+        -   Syntax: `IF <expression> {THEN <statement> | GOTO | GOSUB | <scope>}`
+        -   if expression is true perform the following:
+
+            -   THEN: perform a single statement
+
+            -   GOTO or GOSUB: jump to a line using the logic in GOTO or GOSUB
+
+            -   IF can also be given a scope using `BEGIN`and `FIN` to call when the if statement is true
+
+    -   #### END
+
+        -   Terminate the program early and cleanly
+
+        -   Every script has an invisible `END` at the end of it. Hence this is mostly used for early returns
+
+    -   #### STOP
+        -   Syntax: `STOP <errorcode>`
+        -   Terminate the program early with the given error code
+
+3.  ### Error Handling
+
+    -   #### ONERR
+
+        -   Syntax: `ONERR <statement>`
+        -   Sets the current error handler to a given statement. If a built in function throws an error or the `THROW` keyword is used, the error handler is called and the error code is passed into the `ERR` global variable
+
+    -   #### THROW
+        -   Syntax: `THROW <code>`
+        -   Trigger the `ONERR` handler and store _code_ into `ERR`
+
+4.  ### User I/O
+
+    -   #### PRINT
+
+        -   Syntax: `PRINT { <format> [, <expression> ...] | <expression> }`
+        -   Prints the given expression(s) to the console. If a format is given, it is used to
+            format the output, replacing any `{}`s with the expression(s) given from left to right.
+        -   Example:
+
+            ```basic
+            LET Name$ = "Kevin"
+            PRINT "Hello {}!", Name$
+            ```
+
+            Output:
+
+            ```console
+            Hello Kevin!
+            ```
+
+    -   #### INPUT
+
+        -   Syntax: `INPUT [prompt]`
+        -   Reads a line from `STDIN`
+        -   Can be given an optional prompt to show the user
+        -   Used as a function, returns the line read from `STDIN`
+        -   Example:
+
+            ```basic
+            LET X$ = INPUT "Enter a number"
+            PRINT X$
+            ```
+
+            Output:
+
+            ```console
+            Enter a number
+            > 5
+            5
+            ```
