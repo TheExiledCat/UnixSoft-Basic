@@ -500,4 +500,37 @@ A lot of redundant functionality has been either added on top of. Or an alternat
         -   Sets the cursor flash to the boolean evaluation of the expression
 
 5.  ### GRAPHICS
+
     -
+
+6.  ### Date and Time
+
+    Since the original Applesoft BASIC language was very limited to the hardware it ran on, date and time functionality wasnt really that great.
+
+    USB build on that in a simple but still usable way:
+
+    -   ### DATE
+        -   Syntax: `DATE`
+        -   Get the current date and time (Unix epoch) as an integer
+        -   Example:
+            ```basic
+            LET now = DATE
+            PRINT now // e.g. 1643723900
+            ```
+        -   Note: Casting a date to a string using `STR()` will default to the format `YYYY-MM-DD HH:MM:SS`
+    -   ### TIME
+
+        -   Get the current time of the day as a float storing the hour value (0-24)
+        -   Example:
+            ```basic
+            LET now = TIME
+            PRINT now // e.g. 12.5 for 12:30
+            ```
+        -   Note: Casting a time to a string using `STR()` will default to the format `HH:MM`. When used as a cast `TIME()` will return the time of a `DATE` integer
+
+    -   ### DAY or HOUR or MINUTE or SECOND
+        -   Helper functions to create a date integer storing a date offset
+        -   Example:
+            ```basic
+            LET tommorow = DATE + DAY 1
+            ```
