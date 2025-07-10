@@ -1,6 +1,6 @@
 ---
 hide:
-  - toc
+    - toc
 ---
 
 # UnixSoft-BASIC official documentation

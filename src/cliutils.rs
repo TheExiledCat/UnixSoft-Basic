@@ -91,6 +91,18 @@ fn create_project_directory(dir: PathBuf) {
     fs::create_dir(&dir.join("obj")).unwrap();
     fs::create_dir(&dir.join("src")).unwrap();
     fs::write(&dir.join("src/main.usb"), "10 PRINT \"Hello, World\"").unwrap();
+    fs::write(
+        &dir.join(format!(
+            "{}.usbp.json",
+            dir.file_name().unwrap().to_string_lossy()
+        )),
+        r#"
+{
+    "entry_point": "src/main.usb"
+}
+    "#,
+    )
+    .unwrap();
 }
 pub fn generate_default_project(dir: PathBuf) {
     let dir = relative_to_absolute(dir);

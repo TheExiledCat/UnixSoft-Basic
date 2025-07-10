@@ -1,6 +1,6 @@
 ---
 hide:
-  - toc
+    - toc
 ---
 
 # Getting Started
@@ -35,38 +35,42 @@ usbasic init <directory>
 
 This will create the following directory and its structure if given (can also be used in an existing directory):
 
-- `/directory/`
+-   `/directory/`
 
-  - `src/`
+    -   `src/`
 
-    - `main.usb`
+        -   `main.usb`
 
-  - `obj/`
+    -   `obj/`
 
-  - `build/`
+    -   `build/`
 
-  - `<directoryname>.usbp.json`
+    -   `<directoryname>.usbp.json`
 
-  - `.gitignore`
+    -   `.gitignore`
 
 ### Folder structure explained
 
 The folders above have the following responsibilities:
 
-- `src`:
+-   `src`:
 
-  - Stores all your USB scripts.
+    -   Stores all your USB scripts.
+    -   The default usbp config will set `src/main.usb` as the default entrypoint for `usbasic build`
 
-  - The default usbp config will set `src/main.usb` as the default entrypoint for `usbasic build`
+-   `obj`:
 
-- `obj`:
+    -   Stores temporary files used during building (like `.o` , `.asm` files and more)
 
-  - Stores temporary files used during building (like `.o` , `.asm` files and more)
+-   `build`:
 
-- `build`:
-  - Stores the actual final binary
-- `.usbp.json`
-  - This is the config file for USB projects
-  - This stores configuration settings, dependencies and more.
-- `.gitignore`
-  - Default gitignore ignoring the `obj` and `build` dirs
+    -   Stores the actual final binary
+
+-   `.usbp.json`
+
+    -   This is the config file for USB projects
+    -   This stores configuration settings, dependencies and more.
+
+-   `.gitignore`
+
+    -   Default gitignore ignoring the `obj` and `build` dirs
