@@ -2,7 +2,10 @@ use std::{collections::hash_map::Keys, env, error::Error, fs, path::PathBuf};
 
 use pico_args::Arguments;
 
-use crate::version::Version;
+use crate::{
+    usbcompiler::compiler::{self, compiler::Compiler},
+    version::Version,
+};
 #[derive(Debug)]
 pub enum Command {
     Init { working_dir: String },
@@ -39,6 +42,12 @@ impl Command {
                             .unwrap()
                             .unwrap_or_else(|| String::from("./")),
                     },
+                    "build" => Command::Build {
+                        entry: args
+                            .opt_free_from_str()
+                            .unwrap()
+                            .unwrap_or_else(|| String::from("./")),
+                    },
                     "version" => Command::Version,
                     _ => Command::Help,
                 });
@@ -52,9 +61,9 @@ impl Command {
     pub fn run(&self) -> Result<(), u8> {
         match self {
             Command::Init { working_dir } => generate_default_project(PathBuf::from(working_dir)),
-            Command::Build { entry } => todo!(),
+            Command::Build { entry } => Compiler::new(PathBuf::from(entry)).compile().unwrap(),
             Command::Run { entry } => todo!(),
-            Command::Help => todo!(),
+            Command::Help => show_help(),
             Command::Version => Version::print(),
         }
         return Ok(());

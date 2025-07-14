@@ -128,7 +128,6 @@ impl Lexer {
         let first_char = total.as_bytes()[0].clone() as char;
         last_char_type = Lexer::get_char_type(&first_char);
 
-        println!("Peeked word: {}", total);
         return Some((
             Span::new(start_line, start_col, total.chars().count()),
             last_char_type,
@@ -404,7 +403,6 @@ impl Lexer {
         if character != '\"' {
             return Ok(None);
         }
-        println!("Handling string literal starting with: {}", character);
 
         let result = self.consume_string_literal()?;
         return Ok(Some(Token {
@@ -417,7 +415,7 @@ impl Lexer {
         if !character.is_ascii_digit() {
             return Ok(None);
         }
-        println!("Handling integer literal digit: {}", character);
+
         let word = self.consume_word();
         if let Some(tuple) = word {
             match tuple.1 {
@@ -435,8 +433,6 @@ impl Lexer {
         return Err(LexerError::UnexpectedEof);
     }
     fn handle_operator(&mut self, character: char) -> Result<Option<Token>, LexerError> {
-        println!("Handling operator starting with: {}", character);
-
         let word = self.peek_word();
 
         if let Some(t) = word {
@@ -459,7 +455,6 @@ impl Lexer {
         if !character.is_ascii_alphabetic() {
             return Ok(None);
         }
-        println!("Handling ascii alphabetic for keyword: {}", character);
 
         let word = self.peek_word();
 
@@ -502,22 +497,25 @@ impl Lexer {
 
 pub const APPLESOFT_KEYWORDS: &'static [&'static str] = &[
     "END", "FOR", "NEXT", "DATA", "INPUT", "DEL", "DIM", "READ", "GR", "TEXT", "PR#", "IN#",
-    "CALL", "PLOT", "HLIN", "VLIN", "HGR2", "HGR", "HCOLOR=", "HPLOT", "DRAW", "XDRAW", "HTAB",
-    "HOME", "ROT=", "SCALE=", "SHLOAD", "TRACE", "NOTRACE", "NORMAL", "INVERSE", "FLASH", "COLOR=",
+    "CALL", "PLOT", "HLIN", "VLIN", "HGR2", "HGR", "HCOLOR", "HPLOT", "DRAW", "XDRAW", "HTAB",
+    "HOME", "ROT=", "SCALE=", "SHLOAD", "TRACE", "NOTRACE", "NORMAL", "INVERSE", "FLASH", "COLOR",
     "POP", "VTAB", "HIMEM:", "LOMEM:", "ONERR", "RESUME", "RECALL", "STORE", "SPEED=", "LET",
-    "GOTO", "RUN", "IF", "RESTORE", "GOSUB", "RETURN", "REM", "STOP", "ON", "WAIT", "LOAD", "SAVE",
-    "DEF FN", "POKE", "PRINT", "CONT", "LIST", "CLEAR", "GET", "NEW", "TO", "FN", "THEN", "AT",
+    "GOTO", "RUN", "IF", "RESTORE", "GOSUB", "RETURN", "REM", "STOP", "WAIT", "LOAD", "SAVE",
+    "DEF", "POKE", "PRINT", "CONT", "LIST", "CLEAR", "GET", "NEW", "TO", "FN", "THEN", "AT",
     "STEP",
 ];
 
 pub const APPLESOFT_FUNCTIONS: &'static [&'static str] = &[
     "SGN", "INT", "ABS", "USR", "FRE", "SCRN", "PDL", "POS", "SQR", "RND", "LOG", "EXP", "COS",
-    "SIN", "TAN", "ATN", "PEEK", "LEN", "STR$", "VAL", "ASC", "CHR$", "LEFT$", "RIGHT$", "MID$",
+    "SIN", "TAN", "ATN", "PEEK", "LEN", "STR", "VAL", "ASC", "CHR", "LEFT", "RIGHT", "MID",
 ];
 pub const APPLESOFT_OPERATORS: &'static [&'static str] =
     &["+", "-", "*", "/", "^", ">", "=", "<", "AND", "OR", "NOT"];
-pub const UNIXSOFT_KEYWORDS: &'static [&'static str] = &["TRUE", "FALSE", "//"];
-pub const UNIXSOFT_FUNCTIONS: &'static [&'static str] = &[];
+pub const UNIXSOFT_KEYWORDS: &'static [&'static str] = &[
+    "TRUE", "FALSE", "//", "DATE", "DAY", "HOUR", "MINUTE", "SECOND", "TIME", "BEGIN", "FIN",
+    "MENU", "POPTIONS", "CSCOPE", "ENUM", "PENUM",
+];
+pub const UNIXSOFT_FUNCTIONS: &'static [&'static str] = &["INT", "FLOAT", "BOOL"];
 pub const UNIXSOFT_OPERATORS: &'static [&'static str] = &[">=", "<=", "!="];
 pub const UNIXSOFT_DELIMITERS: [char; 6] = ['(', ')', '[', ']', ',', ':'];
 
@@ -549,6 +547,51 @@ mod tests {
             actual_tokens.no_eof();
         }
         assert_eq!(actual_tokens, expected_tokens);
+    }
+    #[test]
+    fn test_all_keywords_uppercase() {
+        let operators: Vec<String> = APPLESOFT_OPERATORS
+            .iter()
+            .map(|o| o.to_uppercase())
+            .chain(UNIXSOFT_OPERATORS.iter().map(|o| o.to_uppercase()))
+            .collect();
+        assert_eq!(
+            APPLESOFT_OPERATORS
+                .iter()
+                .map(|o| o.to_owned())
+                .chain(UNIXSOFT_OPERATORS.iter().map(|o| o.to_owned()))
+                .map(|o| o.to_owned())
+                .collect::<Vec<String>>(),
+            operators
+        );
+        let keywords: Vec<String> = APPLESOFT_KEYWORDS
+            .iter()
+            .map(|o| o.to_uppercase())
+            .chain(UNIXSOFT_KEYWORDS.iter().map(|o| o.to_uppercase()))
+            .collect();
+        assert_eq!(
+            APPLESOFT_KEYWORDS
+                .iter()
+                .map(|o| o.to_owned())
+                .chain(UNIXSOFT_KEYWORDS.iter().map(|o| o.to_owned()))
+                .map(|o| o.to_owned())
+                .collect::<Vec<String>>(),
+            keywords
+        );
+        let functions: Vec<String> = APPLESOFT_FUNCTIONS
+            .iter()
+            .map(|o| o.to_uppercase())
+            .chain(UNIXSOFT_FUNCTIONS.iter().map(|o| o.to_uppercase()))
+            .collect();
+        assert_eq!(
+            APPLESOFT_FUNCTIONS
+                .iter()
+                .map(|o| o.to_owned())
+                .chain(UNIXSOFT_FUNCTIONS.iter().map(|o| o.to_owned()))
+                .map(|o| o.to_owned())
+                .collect::<Vec<String>>(),
+            functions
+        );
     }
     #[test]
     fn test_recognize_simple_keyword() {

@@ -35,7 +35,7 @@ impl Compiler {
                 return Err(errors);
             }
         }
-        println!("{:?}", tokens);
+        println!("{:#?}", tokens);
 
         //parse tokens and create ast
         let mut parser = Parser::new(tokens, EvaluationContext::FileLevel);
