@@ -13,6 +13,8 @@ pub enum TokenKind {
     Comma,
     ParenOpen,
     ParenClose,
+    BrackOpen,
+    BrackClose,
     EOF,
 }
 
@@ -275,7 +277,7 @@ impl Lexer {
             || UNIXSOFT_OPERATORS.contains(&character.to_string().as_str())
         {
             CharType::OperatorSymbol
-        } else if UNIXSOFT_DELIMITERS.contains(&character.to_string().as_str()) {
+        } else if UNIXSOFT_DELIMITERS.contains(&character) {
             CharType::Delimiter
         } else if character.clone() == '\"' {
             CharType::Quote
@@ -290,6 +292,7 @@ impl Lexer {
     fn get_handlers(&self) -> Vec<TokenRecognizer> {
         return vec![
             Self::handle_newline,
+            Self::handle_delimiter,
             Self::handle_string_literal,
             Self::handle_integer_literal,
             Self::handle_operator,
@@ -360,6 +363,30 @@ impl Lexer {
             return Err((tokens, errors));
         }
         return Ok(tokens);
+    }
+    fn handle_delimiter(&mut self, character: char) -> Result<Option<Token>, LexerError> {
+        let kind;
+        if character == '(' {
+            kind = TokenKind::ParenOpen;
+        } else if character == ')' {
+            kind = TokenKind::ParenClose;
+        } else if character == '[' {
+            kind = TokenKind::BrackOpen;
+        } else if character == ']' {
+            kind = TokenKind::BrackOpen;
+        } else if character == ',' {
+            kind = TokenKind::Comma;
+        } else if character == ':' {
+            kind = TokenKind::Colon;
+        } else {
+            return Ok(None);
+        }
+
+        return Ok(Some(Token {
+            kind,
+            position_flat: self.position_flat,
+            position_span: self.position_span.clone(),
+        }));
     }
 
     fn handle_newline(&mut self, character: char) -> Result<Option<Token>, LexerError> {
@@ -492,7 +519,7 @@ pub const APPLESOFT_OPERATORS: &'static [&'static str] =
 pub const UNIXSOFT_KEYWORDS: &'static [&'static str] = &["TRUE", "FALSE", "//"];
 pub const UNIXSOFT_FUNCTIONS: &'static [&'static str] = &[];
 pub const UNIXSOFT_OPERATORS: &'static [&'static str] = &[">=", "<=", "!="];
-pub const UNIXSOFT_DELIMITERS: &'static [&'static str] = &["(", ")", "[", "]", ",", ":"];
+pub const UNIXSOFT_DELIMITERS: [char; 6] = ['(', ')', '[', ']', ',', ':'];
 
 #[cfg(test)]
 mod tests {
@@ -630,5 +657,36 @@ mod tests {
             TokenKind::Keyword("TRUE".into()),
         ];
         assert_script_tokens(input, expected_tokens, true);
+    }
+    #[test]
+    fn test_delimiters() {
+        let input = "DEF my_func x,y,z = x+y+z\nLET a = my_func(1,2,3)";
+        let expected_tokens = vec![
+            TokenKind::Keyword("DEF".into()),
+            TokenKind::Identifier("my_func".into()),
+            TokenKind::Identifier("x".into()),
+            TokenKind::Comma,
+            TokenKind::Identifier("y".into()),
+            TokenKind::Comma,
+            TokenKind::Identifier("z".into()),
+            TokenKind::Operator("=".into()),
+            TokenKind::Identifier("x".into()),
+            TokenKind::Operator("+".into()),
+            TokenKind::Identifier("y".into()),
+            TokenKind::Operator("+".into()),
+            TokenKind::Identifier("z".into()),
+            TokenKind::Newline,
+            TokenKind::Keyword("LET".into()),
+            TokenKind::Identifier("a".into()),
+            TokenKind::Operator("=".into()),
+            TokenKind::Identifier("my_func".into()),
+            TokenKind::ParenOpen,
+            TokenKind::Number("1".into()),
+            TokenKind::Comma,
+            TokenKind::Number("2".into()),
+            TokenKind::Comma,
+            TokenKind::Number("3".into()),
+            TokenKind::ParenClose,
+        ];
     }
 }

@@ -103,7 +103,7 @@ fn create_project_directory(dir: PathBuf) {
     "#,
     )
     .unwrap();
-    fs::write(&dir.join(".gitignore"), "obj\nbuild\n").unwrap();]
+    fs::write(&dir.join(".gitignore"), "obj\nbuild\n").unwrap();
 }
 pub fn generate_default_project(dir: PathBuf) {
     let dir = relative_to_absolute(dir);
