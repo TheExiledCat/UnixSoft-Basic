@@ -3,6 +3,10 @@ use std::fs::{self, File};
 use std::io::{BufRead, BufReader, Write};
 use std::path::Path;
 fn main() {
+    build_stdlib_definition();
+}
+
+fn build_stdlib_definition() {
     //create stdlib
     let out_dir = env::var("OUT_DIR").unwrap();
     let dest_path = Path::new(&out_dir).join("generated_usblib.rs");
