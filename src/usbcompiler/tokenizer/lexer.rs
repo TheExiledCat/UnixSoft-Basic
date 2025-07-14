@@ -1,3 +1,4 @@
+use crate::stdlib::{ENC_FUNCTIONS, POS_FUNCTIONS};
 use crate::usbcompiler::errors::error::LexerError;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -5,7 +6,7 @@ pub enum TokenKind {
     // Add more token variants as needed
     Number(String),
     StringLiteral(String),
-    Identifier(String),
+    Identifier(String, bool),
     Keyword(String),
     Operator(String),
     Newline,
@@ -506,8 +507,8 @@ pub const APPLESOFT_KEYWORDS: &'static [&'static str] = &[
 ];
 
 pub const APPLESOFT_FUNCTIONS: &'static [&'static str] = &[
-    "SGN", "INT", "ABS", "USR", "FRE", "SCRN", "PDL", "POS", "SQR", "RND", "LOG", "EXP", "COS",
-    "SIN", "TAN", "ATN", "PEEK", "LEN", "STR", "VAL", "ASC", "CHR", "LEFT", "RIGHT", "MID",
+    "SGN", "ABS", "USR", "FRE", "SCRN", "PDL", "POS", "SQR", "RND", "LOG", "EXP", "COS", "SIN",
+    "TAN", "ATN", "PEEK", "LEN", "STR", "VAL", "ASC", "CHR", "LEFT", "RIGHT", "MID",
 ];
 pub const APPLESOFT_OPERATORS: &'static [&'static str] =
     &["+", "-", "*", "/", "^", ">", "=", "<", "AND", "OR", "NOT"];
