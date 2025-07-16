@@ -21,9 +21,9 @@ pub enum TokenKind {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Token {
-    kind: TokenKind,
-    position_flat: usize,
-    position_span: Span,
+    pub kind: TokenKind,
+    pub position_flat: usize,
+    pub position_span: Span,
 }
 trait NoEof {
     fn no_eof(&mut self) -> &mut Self;

@@ -25,7 +25,7 @@ pub enum LexerError {
 }
 #[derive(Debug)]
 pub enum ParserError {
-    UnepectedToken {
+    UnexpectedToken {
         span: Span,
         token: Token,
     },
