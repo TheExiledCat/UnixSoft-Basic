@@ -6,7 +6,7 @@ pub enum TokenKind {
     // Add more token variants as needed
     Number(String),
     StringLiteral(String),
-    Identifier(String, bool),
+    Identifier(String),
     Keyword(String),
     Operator(String),
     Newline,
